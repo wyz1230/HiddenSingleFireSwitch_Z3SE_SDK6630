@@ -1,26 +1,31 @@
-# Prerequisites
-*.d
-
 # Object files
 *.o
 *.ko
-*.obj
-*.elf
+#*.obj
+/ProductPlus/dim/build_prj
+/IAR ARM - Default/
+/IAR ARM - Default - EFR32MG21A010F768IM32/
+/.settings/
+/GNU ARM v7.2.1 - Default
+/settings/
+/build
+.cproject
+.project
+.settings
+/.pdm
+/build
 
-# Linker output
-*.ilk
-*.map
-*.exp
+*.elf
 
 # Precompiled Headers
 *.gch
 *.pch
 
 # Libraries
-*.lib
-*.a
-*.la
-*.lo
+#*.lib
+#*.a
+#*.la
+#*.lo
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -29,7 +34,7 @@
 *.dylib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app
 *.i*86
@@ -38,15 +43,46 @@
 
 # Debug files
 *.dSYM/
-*.su
-*.idb
-*.pdb
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# wyz add
+*.htm
+*.axf
+*.dep
+*.crf
+*.Administrator
+*.zip
+*.bak
+*.bin
+*.map
+*.in
+*.o
+*.hex
+*.lst
+#*.mk
+*.IAB
+*.IAD
+*.IMB
+*.IMD
+*.PO
+*.PS
+*.PRI
+*.PFI
+*.WK3
+*.SearchResults
+*.stackdump
+*.PR
+*.lst
+*.__i
+*.otz
+*.SBR
+*.AOF
+*.lnp
+*.HEX
+*.wangyongzhi
+*.wsdt
+
+makefile
+
+/Projects/V2.16/Beta1/Project/JLinkLog.txt
+/Projects/V2.16/DFU/Project/JLinkLog.txt
+/Projects/V2.16/BleRawData/Project/JLinkLog.txt

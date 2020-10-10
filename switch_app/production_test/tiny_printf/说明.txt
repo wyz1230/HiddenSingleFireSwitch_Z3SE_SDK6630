@@ -1,0 +1,19 @@
+这是一个轻量级全功能的printf实现，执行速度和编译后CODE大小都比c标准库都有优势。
+
+
+可以通过一下宏来裁剪模块：
+
+#define PRINTF_SUPPORT_FLOAT  //支持浮点 %f 打印
+
+#define PRINTF_SUPPORT_LONG_LONG  //支持长整型（long long） %llu or %p 打印
+
+#define PRINTF_SUPPORT_PTRDIFF_T //支持 %t 整型打印
+
+使用方式：
+实现函数 void _putchar(char character) 即可
+例如在stm32中
+void _putchar(char character)
+{
+    uint8_t ch = character;
+    HAL_UART_Transmit(&huart1,&ch,1,2);
+}
