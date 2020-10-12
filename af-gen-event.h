@@ -15,6 +15,7 @@
   extern EmberEventControl appDelayAddNetworkControl; \
   extern EmberEventControl appPowerOnDelayInitEventControl; \
   extern EmberEventControl appPowerOnOperationControl; \
+  extern EmberEventControl app_IdentifyDeviceControl; \
   extern EmberEventControl buttonsAppTimerEventControl; \
   extern EmberEventControl buttonsDriverButtonTaskEventControl; \
   extern EmberEventControl coordinatorManufaIdentifyStepProEventControl; \
@@ -31,6 +32,7 @@
   extern void appDelayAddNetworkHandler(void); \
   extern void appPowerOnDelayInitEventHandler(void); \
   extern void appPowerOnOperationHandler(void); \
+  extern void app_IdentifyDeviceEventHandler(void); \
   extern void buttonsAppTimerEventHandler(void); \
   extern void buttonsDriverButtonTaskEventHandler(void); \
   extern void coordinatorManufaIdentifyStepProEventHandler(void); \
@@ -77,6 +79,7 @@
   { &appDelayAddNetworkControl, appDelayAddNetworkHandler }, \
   { &appPowerOnDelayInitEventControl, appPowerOnDelayInitEventHandler }, \
   { &appPowerOnOperationControl, appPowerOnOperationHandler }, \
+  { &app_IdentifyDeviceControl, app_IdentifyDeviceEventHandler }, \
   { &buttonsAppTimerEventControl, buttonsAppTimerEventHandler }, \
   { &buttonsDriverButtonTaskEventControl, buttonsDriverButtonTaskEventHandler }, \
   { &coordinatorManufaIdentifyStepProEventControl, coordinatorManufaIdentifyStepProEventHandler }, \
@@ -101,6 +104,7 @@
   "App delay add network control",  \
   "App power on delay init event control",  \
   "App power on operation control",  \
+  "Event data",  \
   "Buttons app timer event control",  \
   "Buttons driver button task event control",  \
   "Coordinator manufa identify step pro event control",  \

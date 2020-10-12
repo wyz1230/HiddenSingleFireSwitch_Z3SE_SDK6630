@@ -464,7 +464,7 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 			buttonsAppDebugPrintln("Change to current switch type:%d,%d",num,temp_switch_type);
 			status =writeDeviceTypeAttribute(temp_switch_type);
 			if (status == EMBER_ZCL_STATUS_SUCCESS) {
-				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE); //快闪三次
+				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
 			}
 		}
 		if(emberAfNetworkState() ==EMBER_JOINED_NETWORK)

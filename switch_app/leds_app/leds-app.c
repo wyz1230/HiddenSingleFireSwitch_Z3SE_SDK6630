@@ -103,10 +103,8 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
   {
     if (leds_status == LEDS_STATUS_POWER_ON_INIT) //上电初始化一次后，关灯
     {
-      for (i = 0; i<LEDS_LIST_NUMBER; i++)
-      {
-        ledsDriverLedsControl(i,0,500,500, 1);
-      }
+	  ledsDriverLedsControl(leds_number_list[0],0,500,500, 1);
+
     }
     return;
   }
@@ -149,17 +147,12 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
       break;
 
     case LEDS_STATUS_NETWORK_LEAVED:        //离网状态
-	  //离网状态快闪，100ms亮，100ms灭。
-	  #if 1
-	  ledsDriverLedsControl(leds_number_list[0], 0,100,200, LED_REPEAT_TYPE_ALWAYS_REPEAT);
-      leds_current_status_lock = 1;
+
+	  ledsDriverLedsControl(leds_number_list[0], 0,100,200, LED_REPEAT_TYPE_ALWAYS_REPEAT); //离网状态快闪，100ms亮，100ms灭。
+      //leds_current_status_lock = 1;
       leds_current_identifying_flag = 0;
-	  emberEventControlSetDelayMS(ledsAppTimerEventControl,3000);  //锁定3秒后解除.
-	  #endif
-	  #if 0
-      ledsDriverLedsControl(leds_number_list[0],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                              LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-	  #endif
+	  //emberEventControlSetDelayMS(ledsAppTimerEventControl,3000);      //锁定3秒后解除.
+	  ledsAppDebugPrintln("leds indicate leaved");
       break;
 
     case LEDS_STATUS_NETWORK_JOINING:       //加网状态
@@ -167,6 +160,7 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
       {
 		//加网慢闪,500ms亮500ms灭周期
 		ledsDriverLedsControl(leds_number_list[0], 0,500,1000, LED_REPEAT_TYPE_ALWAYS_REPEAT);
+		ledsAppDebugPrintln("LEDS_STATUS_NETWORK_JOINING");
       }
 
       leds_current_identifying_flag = 0;
@@ -174,111 +168,25 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
 
     case LEDS_STATUS_NETWORK_JOINED:        //在网状态
 	  //所有灯灭
-	  #if 0
-      for (i=0; i<ways; i++)
-      {
-		if (leds_number_list[i] < LEDS_LIST_NUMBER)
-        {
-         #if 1
-          ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                  LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-         #else
-          if (relayControlDriverGetCurrenStatus(i) == RELAY_CONTROL_TURN_OFF) //关的状态，指示灯灭
-          {
-            ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                    LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-          }
-          else //开的状态，指示灯亮
-          {
-            ledsDriverLedsControl(leds_number_list[i],0,500,500, 1);
-          }
-         #endif
-		}
-      }
-	  #endif
+
 	  ledsDriverLedsControl(leds_number_list[0],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
                                   LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
       leds_current_identifying_flag = 0;
 	  break;
 
-	case LEDS_STATUS_CHANGE_SWITCHTYPE:
-	ledsDriverLedsControl(leds_number_list[0], 0,60,120, LED_REPEAT_TYPE_THREE);
-	leds_current_identifying_flag = 0;
-	break;
-
     case LEDS_STATUS_SWITCH_1_STATUS_UPDATE:  //更新开关状态
 	case LEDS_STATUS_SWITCH_2_STATUS_UPDATE:
 	case LEDS_STATUS_SWITCH_3_STATUS_UPDATE:
-#if 1
-	  #if 0
-      led_way = leds_status - LEDS_STATUS_SWITCH_1_STATUS_UPDATE;
-      for (i=0; i<ways; i++)
-      {
-		if (leds_number_list[i] < LEDS_LIST_NUMBER)
-	    {
-          if (i == led_way)
-          {
-             ledsDriverLedsControl(leds_number_list[led_way], 0,300,300, 1);//闪一次，300ms
-          }
-          else
-          {
-            ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                    LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-          }
-		}
-	  }
-	  #endif
-	  ledsDriverLedsControl(leds_number_list[0], 0,300,300, 1);//闪一次，300ms
-//      //开关状态变化时，对应的指示灯快闪一下，300ms
-//	  led_way = leds_status - LEDS_STATUS_SWITCH_1_STATUS_UPDATE;
-//	  if (led_way < ways)
-//      {
-//		if (leds_number_list[led_way] < LEDS_LIST_NUMBER)
-//	    {
-//          ledsDriverLedsControl(leds_number_list[led_way], 0,300,
-//                                300, 1);
-//		}
-//	  }
-      leds_current_identifying_flag = 0;
-      leds_current_status_lock = 1;
-      emberEventControlSetDelayMS(ledsAppTimerEventControl,300);         //闪一次
-#else
-      //开关状态变化时，对应的指示灯快闪一下，300ms
-	  led_way = leds_status - LEDS_STATUS_SWITCH_1_STATUS_UPDATE;
-      for (i=0; i<ways; i++)
-      {
-		if (leds_number_list[i] < LEDS_LIST_NUMBER)
-	    {
-          if (i == led_way)
-          {
-             ledsDriverLedsControl(leds_number_list[led_way], 100,300,500, 1);//闪一次，300ms
-          }
-          else if (relayControlDriverGetCurrenStatus(i) == RELAY_CONTROL_TURN_OFF) //关的状态，指示灯灭
-          {
-            ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                    LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-          }
-          else //关的状态，指示灯亮
-          {
-            ledsDriverLedsControl(leds_number_list[i],0,1000,1000, 1);
-          }
-          // else
-          // {
-            // ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                    // LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-          // }
-		}
-	  }
-      leds_current_identifying_flag = 0;
-      leds_current_status_lock = 1;
-      emberEventControlSetDelayMS(ledsAppTimerEventControl,500);         //闪一次
-#endif
+		//开关状态变化时，对应的指示灯快闪一下，300ms
+		ledsDriverLedsControl(leds_number_list[0], 0,200,500, 1);//闪一次，300ms
+		leds_current_status_lock = 1;
+		emberEventControlSetDelayMS(ledsAppTimerEventControl,1000); 		//闪一次
+
       break;
 
     case LEDS_STATUS_IDENTIFY_UPDATE:
 
       new_identifying_flag = getIdentifyingFlg();
-	  #if 0
       for (i=0; i<ways; i++)
       {
 		if (leds_number_list[i] < LEDS_LIST_NUMBER)
@@ -287,35 +195,42 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
           {
             if (get_bit(new_identifying_flag,i)) //开启identify
             {
-               ledsDriverLedsControl(leds_number_list[i], 0,1000,2000, LED_REPEAT_TYPE_ALWAYS_REPEAT);
+               ledsDriverLedsControl(leds_number_list[0], 0,1000,2000, LED_REPEAT_TYPE_ALWAYS_REPEAT);
                set_bit(leds_current_identifying_flag,i);
             }
             else  //停止identify
             {
-               ledsDriverLedsControl(leds_number_list[i],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-                                         LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
+			   ledsDriverLedsControl(leds_number_list[0],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
+									   LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
+
                reset_bit(leds_current_identifying_flag,i);
             }
           }
 		}
 	  }
-	  #endif
-	  //identify灯泡闪烁,led用户看不在
-		if (get_bit(leds_current_identifying_flag,0) != get_bit(new_identifying_flag,0))  //不重复触发
-		{
-		  if (get_bit(new_identifying_flag,0)) //开启identify
-		  {
-			 ledsDriverLedsControl(leds_number_list[0], 0,1000,2000, LED_REPEAT_TYPE_ALWAYS_REPEAT);
-			 set_bit(leds_current_identifying_flag,0);
+
+	  if(getIdentifySetEndpoint() ==4) //智能开关的查找，三个led同时闪烁
+	  {
+		  if(getIdentifyStatus())
+	   	  {			
+			 ledsDriverLedsControl(leds_number_list[0], 0,1000,2000, LED_REPEAT_TYPE_ALWAYS_REPEAT);			
 		  }
-		  else	//停止identify
+		  else //停止identify
 		  {
-			 ledsDriverLedsControl(leds_number_list[0],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
-									   LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
-			 reset_bit(leds_current_identifying_flag,0);
+			  ledsDriverLedsControl(leds_number_list[0],0,LED_FREQUENCY_TYPE_ALWAYS_OFF,
+									  LED_FREQUENCY_TYPE_ALWAYS_OFF, LED_REPEAT_TYPE_STOP_REPEAT);
+
+		      leds_current_identifying_flag = 0;			 
 		  }
-		}
+	  }	  
       break;
+
+	  case LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA:
+	  //开关状态变化时，对应的指示灯快闪一下，300ms
+	  ledsDriverLedsControl(leds_number_list[0], 0,60,120, 3);//闪一次，300ms
+	  leds_current_status_lock = 1;
+	  emberEventControlSetDelayMS(ledsAppTimerEventControl,1000);		  //闪一次
+	  break;
 
 	case LEDS_STATUS_SLEEP_END_DEVICE:
 	ledsDriverLedsControl(leds_number_list[0], 0,60,120, LED_REPEAT_TYPE_THREE);

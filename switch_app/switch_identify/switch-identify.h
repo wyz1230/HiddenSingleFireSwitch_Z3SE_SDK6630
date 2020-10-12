@@ -28,6 +28,21 @@
 */
 uint8_t getIdentifyingFlg(void);
 
+/**
+//函数名：app_IdentifyDeviceEventHandler
+//描述：获取查找的时候设置的endpoint
+//参数：void
+//返回：endpoint
+*/
+uint8_t getIdentifySetEndpoint(void);
+
+/**
+//函数名：getIdentifyStatus
+//描述：获取identify状态
+//参数：void
+//返回：startIdentifyFlg
+*/
+uint8_t getIdentifyStatus(void);
 #endif
 /*************************************** 文 件 结 束 ******************************************/
 

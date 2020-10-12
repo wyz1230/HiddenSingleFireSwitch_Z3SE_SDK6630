@@ -90,6 +90,7 @@ coordinatorManufaIdentifyStepProEventControl,coordinatorManufaIdentifyStepProEve
 appPowerOnDelayInitEventControl,appPowerOnDelayInitEventHandler
 appDelayAddNetworkControl,appDelayAddNetworkHandler
 appPowerOnOperationControl,appPowerOnOperationHandler
+app_IdentifyDeviceControl,app_IdentifyDeviceEventHandler
 }
 {setupId:halOptions
 }

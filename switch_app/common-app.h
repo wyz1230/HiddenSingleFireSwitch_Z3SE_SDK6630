@@ -80,7 +80,7 @@
   #define SWITCH_3_GAND_MODELID_STRING   "e8d667cb184b4a2880dd886c23d00976"
   #pragma message("ORVIBO MixSwitch 零火版")
 #elif(POWER_LINE_SUPPLY == HIDDEN_SINGFIRE)
-  #define HIDDEN_SINGFIRE_MODELID_STRING "b11c438ea86f416b9026b2526b7abe84" //"2810c2403b9c4a5db62cc62d1030d95e"
+  #define HIDDEN_SINGFIRE_MODELID_STRING "b11c438ea86f416b9026b2526b7abe84" //"2810c2403b9c4a5db62cc62d1030d95e" 
 #endif
 
 //定义版本信息，此部分会在上电打印和更新basic属性值。

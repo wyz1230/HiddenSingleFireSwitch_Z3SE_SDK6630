@@ -1152,7 +1152,7 @@ static void switchOnDoneProc(uint8_t way)
        {
           if (emberAfNetworkState() == EMBER_NO_NETWORK) //TODO: （没在加网）按产品功能来处理
           {
-              //TODO: 延时触发加网
+              //延时触发加网
               networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
           }
        }
