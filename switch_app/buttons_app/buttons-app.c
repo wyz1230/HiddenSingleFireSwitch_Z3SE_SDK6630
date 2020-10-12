@@ -47,7 +47,7 @@ typedef struct{
 EmberEventControl buttonsAppTimerEventControl;   //两次按键之间的超时计时器
 //void buttonsAppTimerEventHandler(void);
 EmberEventControl app_RestartEventControl;
-EmberEventControl appDelayAddNetworkControl;
+EmberEventControl delaySyncStatusControl;
 
 /* 本地变量区 ------------------------------------------------------------------ */
 static tButtonPressedCount buttons_counter[BUTTON_MAX_NUMBER];
@@ -390,7 +390,7 @@ static void buttonsPressedProcess(uint8_t num)
           if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
           {
              buttons_counter[num].update_flag = 1;
-             emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+             emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
              return;
           }
           else
@@ -398,7 +398,7 @@ static void buttonsPressedProcess(uint8_t num)
             buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
             buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
             buttons_counter[num].update_flag = 0;
-            emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+            emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
           }
         #endif
         //end jim
@@ -413,7 +413,7 @@ static void buttonsPressedProcess(uint8_t num)
           if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
           {
              buttons_counter[num].update_flag = 1;
-             emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+             emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
              return;
           }
           else
@@ -421,7 +421,7 @@ static void buttonsPressedProcess(uint8_t num)
             buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
             buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
             buttons_counter[num].update_flag = 0;
-            emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+            emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
           }
         #endif
          //end jim
@@ -604,7 +604,7 @@ static void buttonLowCallbackProcess(uint8_t num)
       if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
       {
          buttons_counter[num].update_flag = 1;
-         emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+         emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
          return;
       }
       else
@@ -612,7 +612,7 @@ static void buttonLowCallbackProcess(uint8_t num)
         buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
         buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
         buttons_counter[num].update_flag = 0;
-        emberEventControlSetDelayMS(appDelayAddNetworkControl,10); //延时更新锁定时间
+        emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
       }
     #endif
 	buttonsAppDebugPrintln("====low:%d,%d",num,switch_type);
@@ -636,16 +636,16 @@ void app_RestartEventHandler(void)
 }
 
 /**
-//函数名：appDelayAddNetworkHandler
-//描述：延时加网的handler
+//函数名：delaySyncStatusHandler
+//描述：延时更新同步开关状态的handler
 //参数：void
 //返回：无
 */
-void appDelayAddNetworkHandler(void)
+void delaySyncStatusHandler(void)
 {
  #ifdef BUTTON_SPEECH_LIMIT
     uint16_t currentTick,remain,minRemainMs=0xFFFF;
-    emberEventControlSetInactive(appDelayAddNetworkControl);  //修改用来做延时更新同步开关状态用，后续把事件名称修改
+    emberEventControlSetInactive(delaySyncStatusControl);  
     currentTick = halCommonGetInt16uMillisecondTick();
     buttons_counter[0].last_action_time_ms = 0; //按键0没做限制
     for (uint8_t i=0; i<2;i++)
@@ -688,7 +688,7 @@ void appDelayAddNetworkHandler(void)
     }
   if (minRemainMs != 0xFFFF)
   {
-    emberEventControlSetDelayMS(appDelayAddNetworkControl,minRemainMs); //延时更新锁定时间
+    emberEventControlSetDelayMS(delaySyncStatusControl,minRemainMs); //延时更新锁定时间
     buttonsAppDebugPrintln("button lock remain:%d",minRemainMs);
   }
  #endif
@@ -702,6 +702,9 @@ void appDelayAddNetworkHandler(void)
 */
 void syncButtonAndSwitchStatus(void)
 {
+	uint8_t networkStatus =0;
+	networkStatus =emberAfNetworkState();
+
     if(switch_type == SWITCH_TYPE_QIAOBAN)
     {
       for (uint8_t i=0; i<2;i++)
@@ -716,5 +719,16 @@ void syncButtonAndSwitchStatus(void)
         }
       }
     }
+  if (networkStatus == EMBER_NO_NETWORK)   //按下触发加网
+  {
+    if (buttons_counter[1].last_button_status)  //第一路上电5s后是打开的
+    {
+       if (RELAY_CONTROL_TURN_ON == relayControlDriverGetCurrenStatus(MAIN_POWER_RELAY_NUMBER)) //jim 20200716 only one way on can search network
+       {
+	     networkStatusTrigeNetworkAction(NETWORK_ACTION_START_JOIN);
+         buttonsAppDebugPrintln("power on start network");
+       }
+    }
+  }	
 }
 /*************************************** 文 件 结 束 ******************************************/

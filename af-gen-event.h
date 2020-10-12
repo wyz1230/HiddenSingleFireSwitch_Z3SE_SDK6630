@@ -12,13 +12,13 @@
   EmberEventControl emberAfIdentifyClusterServerTickCallbackControl1; \
   EmberEventControl emberAfOtaBootloadClusterClientTickCallbackControl1; \
   EmberEventControl emberAfIdentifyClusterServerTickCallbackControl2; \
-  extern EmberEventControl appDelayAddNetworkControl; \
   extern EmberEventControl appPowerOnDelayInitEventControl; \
   extern EmberEventControl appPowerOnOperationControl; \
   extern EmberEventControl app_IdentifyDeviceControl; \
   extern EmberEventControl buttonsAppTimerEventControl; \
   extern EmberEventControl buttonsDriverButtonTaskEventControl; \
   extern EmberEventControl coordinatorManufaIdentifyStepProEventControl; \
+  extern EmberEventControl delaySyncStatusControl; \
   extern EmberEventControl emberAfPluginNetworkSteeringFinishSteeringEventControl; \
   extern EmberEventControl emberAfPluginOtaStorageSimpleEepromPageEraseEventControl; \
   extern EmberEventControl emberAfPluginReportingTickEventControl; \
@@ -29,13 +29,13 @@
   extern EmberEventControl networkActionPollingEventControl; \
   extern EmberEventControl relayControlTaskEventControl; \
   extern EmberEventControl scenesTransitionEventControl; \
-  extern void appDelayAddNetworkHandler(void); \
   extern void appPowerOnDelayInitEventHandler(void); \
   extern void appPowerOnOperationHandler(void); \
   extern void app_IdentifyDeviceEventHandler(void); \
   extern void buttonsAppTimerEventHandler(void); \
   extern void buttonsDriverButtonTaskEventHandler(void); \
   extern void coordinatorManufaIdentifyStepProEventHandler(void); \
+  extern void delaySyncStatusHandler(void); \
   extern void emberAfPluginNetworkSteeringFinishSteeringEventHandler(void); \
   extern void emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler(void); \
   extern void emberAfPluginReportingTickEventHandler(void); \
@@ -76,13 +76,13 @@
   { &emberAfIdentifyClusterServerTickCallbackControl1, emberAfIdentifyClusterServerTickCallbackWrapperFunction1 }, \
   { &emberAfOtaBootloadClusterClientTickCallbackControl1, emberAfOtaBootloadClusterClientTickCallbackWrapperFunction1 }, \
   { &emberAfIdentifyClusterServerTickCallbackControl2, emberAfIdentifyClusterServerTickCallbackWrapperFunction2 }, \
-  { &appDelayAddNetworkControl, appDelayAddNetworkHandler }, \
   { &appPowerOnDelayInitEventControl, appPowerOnDelayInitEventHandler }, \
   { &appPowerOnOperationControl, appPowerOnOperationHandler }, \
   { &app_IdentifyDeviceControl, app_IdentifyDeviceEventHandler }, \
   { &buttonsAppTimerEventControl, buttonsAppTimerEventHandler }, \
   { &buttonsDriverButtonTaskEventControl, buttonsDriverButtonTaskEventHandler }, \
   { &coordinatorManufaIdentifyStepProEventControl, coordinatorManufaIdentifyStepProEventHandler }, \
+  { &delaySyncStatusControl, delaySyncStatusHandler }, \
   { &emberAfPluginNetworkSteeringFinishSteeringEventControl, emberAfPluginNetworkSteeringFinishSteeringEventHandler }, \
   { &emberAfPluginOtaStorageSimpleEepromPageEraseEventControl, emberAfPluginOtaStorageSimpleEepromPageEraseEventHandler }, \
   { &emberAfPluginReportingTickEventControl, emberAfPluginReportingTickEventHandler }, \
@@ -101,13 +101,13 @@
   "Identify Cluster Server EP 1",  \
   "Over the Air Bootloading Cluster Client EP 1",  \
   "Identify Cluster Server EP 2",  \
-  "App delay add network control",  \
   "App power on delay init event control",  \
   "App power on operation control",  \
   "Event data",  \
   "Buttons app timer event control",  \
   "Buttons driver button task event control",  \
   "Coordinator manufa identify step pro event control",  \
+  "App delay add network control",  \
   "Network Steering Plugin FinishSteering",  \
   "OTA Simple Storage EEPROM Driver Plugin PageErase",  \
   "Reporting Plugin Tick",  \
