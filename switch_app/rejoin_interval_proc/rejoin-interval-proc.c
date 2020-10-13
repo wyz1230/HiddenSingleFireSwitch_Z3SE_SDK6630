@@ -81,7 +81,7 @@ typedef struct {
     uint8_t  type;                   //rejoin的类型，0当前信道，1全信道，
     uint32_t delay_ms;               //此rejoin延时多久执行，单位ms。
     uint8_t  retry_max_times;        //此种类型重试最大次数，
-                                     //当type为REJOIN_TYPE_GOTO_TABLE_INDEX模式时，此值用来当跳转的索引号。
+                                     //当type为 REJOIN_TYPE_GOTO_TABLE_INDEX 模式时，此值用来当跳转的索引号。
                                      //当type为REJOIN_TYPE_REPEAT_COUNT_SET时，此值为最大的重复次数。
                                      //当type为REJOIN_TYPE_EACH_CHANNEL_START_SET时，此值为起始信道设定值。
                                      //当type为REJOIN_TYPE_EACH_CHANNEL_STOP_CHECK时，此值用来当跳转的索引号。
