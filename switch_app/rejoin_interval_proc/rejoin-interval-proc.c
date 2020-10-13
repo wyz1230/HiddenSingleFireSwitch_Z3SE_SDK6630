@@ -62,12 +62,12 @@ enum{
                                                 {REJOIN_TYPE_CURRENT_CHANNEL,        30000,16,40000},/*5 */               \
                                                 {REJOIN_TYPE_EACH_CHANNEL_START_SET,     0,11,    0},/*6 从11信道开始*/   \
                                                 {REJOIN_TYPE_EACH_CHANNEL,            2000, 2, 4000},/*7 每个信道试2次*/  \
-                                                {REJOIN_TYPE_EACH_CHANNEL_STOP_CHECK,    0, 7,    0},/*8 判断是否跳转到2*/\
+                                                {REJOIN_TYPE_EACH_CHANNEL_STOP_CHECK,    0, 7,    0},/*8 判断是否跳转到7*/\
                                                 {REJOIN_TYPE_CHECK_REPEAT_COUNT_GOTO,    0, 5,    0},/*9 重复不到6次跳转到5*/ \
                                                 {REJOIN_TYPE_CURRENT_CHANNEL,        60000,16,60000},/*10 */               \
                                                 {REJOIN_TYPE_EACH_CHANNEL_START_SET,     0,11,    0},/*11 从11信道开始*/   \
                                                 {REJOIN_TYPE_EACH_CHANNEL,            2000, 2, 4000},/*12 每个信道试2次*/  \
-                                                {REJOIN_TYPE_EACH_CHANNEL_STOP_CHECK,    0,12,    0},/*13 判断是否跳转到2*/\
+                                                {REJOIN_TYPE_EACH_CHANNEL_STOP_CHECK,    0,12,    0},/*13 判断是否跳转到12*/\
                                                 {REJOIN_TYPE_GOTO_TABLE_INDEX,           0, 5,    0},/*14 */               \
                                                 {REJOIN_TYPE_CURRENT_CHANNEL,          800, 2, 4000},/*15 */               \
                                                 {REJOIN_TYPE_GOTO_TABLE_INDEX,           0,10,    0}}/*16 */
