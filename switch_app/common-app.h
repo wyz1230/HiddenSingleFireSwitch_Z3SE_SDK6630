@@ -91,7 +91,7 @@
   #warning "ota file version undefine!"
 #endif
 #define ORB_MANUFACTURE_NAME_STRING      "ORVIBO"
-#define ORB_DATE_CODE_STRING             "20200608"
+#define ORB_DATE_CODE_STRING             "20201013"
 #define ORB_SW_BUILD_ID_STRING           "1.0.1"
 
 #define ORB_PRODUCT_NAME_STRING          "SingleFireSwitch-MG21"
