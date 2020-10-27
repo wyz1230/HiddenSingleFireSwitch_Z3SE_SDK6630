@@ -103,11 +103,11 @@
   "Identify Cluster Server EP 2",  \
   "App power on delay init event control",  \
   "App power on operation control",  \
-  "Event data",  \
+  "App_ identify device control",  \
   "Buttons app timer event control",  \
   "Buttons driver button task event control",  \
   "Coordinator manufa identify step pro event control",  \
-  "App delay add network control",  \
+  "Delay sync status control",  \
   "Network Steering Plugin FinishSteering",  \
   "OTA Simple Storage EEPROM Driver Plugin PageErase",  \
   "Reporting Plugin Tick",  \

@@ -70,6 +70,7 @@ extern void unicastReportAttribute(uint16_t destination_addr,
                                    uint8_t *datas,
                                    uint8_t dataSize);
 extern EmberAfStatus writeDeviceTypeAttribute(uint8_t type);
+extern void setFlashSwitchType(uint8_t type);
 
 /* 本地函数声明区 -------------------------------------------------------------- */
 static void buttonsStateCallbackProcess(uint8_t num, eButtonState state);
@@ -283,7 +284,7 @@ static void buttonsStateCallbackProcess(uint8_t num, eButtonState state)
 		#ifdef MODULE_CHANGE_NODETYPE
 		else if(1 == buttons_counter[position].short_pressed_counter) //1短1长条件满足
 		{
-			buttonsOneShortLongPressedProcess(position);
+			//buttonsOneShortLongPressedProcess(position);
 		}
 		#endif
         else if (4 == buttons_counter[position].short_pressed_counter) //4短1长条件满足
@@ -460,8 +461,10 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 		{
 			//只允许网外切换开关类型
 			temp_switch_type = (temp_switch_type == SWITCH_TYPE_QIAOBAN? SWITCH_TYPE_DIANCHU : SWITCH_TYPE_QIAOBAN);
+			setFlashSwitchType(temp_switch_type);
 			setSwitchType(temp_switch_type);
-			buttonsAppDebugPrintln("Change to current switch type:%d,%d",num,temp_switch_type);
+			
+			buttonsAppDebugPrintln("Change to current switch type:%d",temp_switch_type);
 			status =writeDeviceTypeAttribute(temp_switch_type);
 			if (status == EMBER_ZCL_STATUS_SUCCESS) {
 				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次

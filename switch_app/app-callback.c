@@ -93,7 +93,7 @@ bool reportingPluginCheckReportConfigExist(uint8_t endpoint,
 static void relayControlFinishedCallback(uint8_t way, uint8_t status);
 static void switchAppNetworkUpTrigReport(void);
 //static void batteryCapacityUpdateCallback(tBatteryWorkRecord *battery_record);
-static void readDeviceTypeAttribute(void);
+static uint8_t readDeviceTypeAttribute(void);
 static void reportDeviceType(void);
 static void reportSwitchType(void);
 //jim add 20200717
@@ -167,6 +167,30 @@ uint8_t getFlashDeviceType(void)
 	return node_type;
 }
 
+/**
+//函数名：setFlashSwitchType
+//描述：设置开关类型，0为翘班，1为回弹
+//参数：无
+//返回：void
+*/
+void setFlashSwitchType(uint8_t type)
+{
+	halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
+}
+
+/**
+//函数名：getFlashSwitchType
+//描述：从flash获取开关是属于翘板还是回弹类型
+//参数：无
+//返回：void
+*/
+uint8_t getFlashSwitchType(void)
+{
+	uint8_t type;
+	halCommonGetToken(&type, TOKEN_CUSTOM_SWITCH_TYPE);
+	customAppDebugPrintln("switch type:%d",type);
+	return type;
+}
 
 void appPowerOnOperationHandler(void)
 {
@@ -228,6 +252,7 @@ void appPowerOnInit(void)
 */
 void appPowerOnDelayInitEventHandler(void)
 {
+  uint8_t tempType =0;
   emberEventControlSetInactive(appPowerOnDelayInitEventControl);
 
   emberSetRadioPower(emberAfPluginNetworkSteeringGetPowerForRadioChannelCallback(emberGetRadioChannel()));
@@ -237,7 +262,9 @@ void appPowerOnDelayInitEventHandler(void)
   deviceInfoAppBasicAttributeInit();           //更新basic属性相关版本信息
   networkStatusProcessInit();                  //上电更新网络状态
   readDeviceTypeAttribute();				   //读开关类型
-  customAppDebugPrintln("app init,switch type:%d",getSwitchType());
+  tempType =getFlashSwitchType();
+  setSwitchType(tempType);
+  customAppDebugPrintln(">>app init,switch type:%d,%d",getFlashSwitchType(),readDeviceTypeAttribute());
 }
 /** @brief Main Init
  *
@@ -330,6 +357,7 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
 bool emberAfStackStatusCallback(EmberStatus status)
 {
 #ifdef POWER_ON_NETWORK_UP_TRIGREJOIN_CODE //20200428 jim add for test
+  //第一次上电，还认为在网，会进行一次全信道的扫描(禁止)，故加的此代码
   static uint8_t first_power_on = 1;
   if (first_power_on)
   {
@@ -528,10 +556,12 @@ static void switchAppNetworkUpTrigReport(void)
                                 ZCL_ON_OFF_ATTRIBUTE_ID,
                                 10+i,
                                 2000); //随机时间上电后每个节点后延一秒
-      customAppDebugPrintln("network up report");
+      customAppDebugPrintln("+++network up onoff report");
   #endif
     }
+	#ifdef MODULE_CHANGE_NODETYPE
 	reportDeviceType();
+	#endif
 	reportSwitchType();
   }
 }
@@ -773,7 +803,7 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
                                    EmberStatus* status)
 {
   //jim add for test
-  customAppDebugPrintln("=====Message Send======");
+  //customAppDebugPrintln("=====Message Send======");
   checkNetworkStateAndTrigeRejoin();
   return false;
 }
@@ -839,85 +869,14 @@ void emberAfPluginIdleSleepWakeUpCallback(uint32_t durationMs)
   }
 #endif
 }
-#if 0 //jim
-/**
-//函数名：updatePowerConfigBatteryPercentageAttribute
-//描述  ：更新power config cluster下的电量百分比属性
-//参数  ：endpoint (uint8_t [输入]，需要更新的power config cluster所在的endpoint)
-//        percent  (uint8_t [输入]，需要更新的百分比，0-100，代码会转换为zigbee属性值的0-200)
-//返回  ：无
-*/
-static void updatePowerConfigBatteryPercentageAttribute(uint8_t endpoint,uint8_t percent)
-{
-  uint8_t percent_temp;
-  if (emberAfContainsServer(endpoint, ZCL_POWER_CONFIG_CLUSTER_ID))
-  {
-    percent_temp = percent;
-    if (percent_temp > 100)
-    {
-      percent_temp = 100;
-    }
-    percent_temp = percent_temp * 2; //转换为zigbee属性的范围值
-    if (emberAfWriteServerAttribute(endpoint,
-                                    ZCL_POWER_CONFIG_CLUSTER_ID,
-                                    ZCL_BATTERY_PERCENTAGE_REMAINING_ATTRIBUTE_ID,
-                                    &percent_temp,
-                                    ZCL_INT8U_ATTRIBUTE_TYPE) != EMBER_ZCL_STATUS_SUCCESS)
-    {
-      customAppDebugPrintln("battery_voltage_percentage write attribute: error!");
-    }
-  }
-}
-/**
-//函数名：updatePowerConfigBatteryVoltageAttribute
-//描述  ：更新power config cluster下的电量电压值属性
-//参数  ：endpoint (uint8_t [输入]，需要更新的power config cluster所在的endpoint)
-//        voltage  (uint16_t [输入]，需要更新的电压值，单位mV，输入后会转换为zigbee的单位100mV)
-//返回  ：无
-*/
-static void updatePowerConfigBatteryVoltageAttribute(uint8_t endpoint,uint16_t voltage)
-{
-  uint8_t voltage_temp;
-  if (emberAfContainsServer(endpoint, ZCL_POWER_CONFIG_CLUSTER_ID))
-  {
-    voltage_temp = voltage/100;
-    if (voltage_temp > 36)
-    {
-      voltage_temp = 36;
-    }
-    if (emberAfWriteServerAttribute(endpoint,
-                                    ZCL_POWER_CONFIG_CLUSTER_ID,
-                                    ZCL_BATTERY_VOLTAGE_ATTRIBUTE_ID,
-                                    &voltage_temp,
-                                    ZCL_INT8U_ATTRIBUTE_TYPE) != EMBER_ZCL_STATUS_SUCCESS)
-    {
-      customAppDebugPrintln("battery_voltage_voltage write attribute: error!");
-    }
-  }
-}
 
-/**
-//函数名：batteryCapacityUpdateCallback
-//描述  ：电池电量采集完成回调
-//参数  ： *battery_record (tBatteryWorkRecord * [输入]，运算后的电池电量记录值指针)
-//返回  ：无
-*/
-static void batteryCapacityUpdateCallback(tBatteryWorkRecord *battery_record)
-{
-  uint8_t endpoint;
-  endpoint = emberAfEndpointFromIndex(0);
-  updatePowerConfigBatteryPercentageAttribute(endpoint,battery_record->last_capacity_percent);
-  updatePowerConfigBatteryVoltageAttribute(endpoint,battery_record->last_heavy_load_voltage);
-  //customAppDebugPrintln("battery capacity = %d percent",percent);
-}
-#endif
 /**
 //函数名：readDeviceTypeAttribute
 //描述：读开关类型的属性，并设置到对应的变量里
 //参数：无
 //返回：void
 */
-static void readDeviceTypeAttribute(void)
+static uint8_t readDeviceTypeAttribute(void)
 {
 	uint8_t temp =0;
 	emberAfReadAttribute(emberAfEndpointFromIndex(0),
@@ -927,8 +886,8 @@ static void readDeviceTypeAttribute(void)
 								(uint8_t *)&temp,
 								sizeof(temp),
 								NULL); // data type
-
-	setSwitchType(temp);
+	customAppDebugPrintln("read switch type attri:%d",temp);
+	return temp;
 }
 
 /**
@@ -1048,6 +1007,7 @@ static void reportDeviceType(void)
 							   ZCL_ENUM8_ATTRIBUTE_TYPE,
 							   (uint8_t *)&temp,
 							   1);
+		customAppDebugPrintln("network up endevice report");
 
 	}
 }
@@ -1077,6 +1037,7 @@ static void reportSwitchType(void)
 							   ZCL_ENUM8_ATTRIBUTE_TYPE,
 							   (uint8_t *)&temp,
 							   1);
+		customAppDebugPrintln("poweron report qiaoban or huitan");
 
 	}
 
