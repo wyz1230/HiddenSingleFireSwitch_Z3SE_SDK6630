@@ -370,9 +370,9 @@ static void buttonsPressedProcess(uint8_t num)
 #endif
   buttonsAppDebugPrintln("pressed:%d,%d",num,switch_type);
 
-  if (networkStatus == EMBER_NO_NETWORK)   //按下触发加网
+  if ((status == EMBER_NO_NETWORK) || (status == EMBER_LEAVING_NETWORK))   //按下触发加网
   {
-    if (num == 0)
+    //if (num == 0)
     {
         //TODO:需要处理判断当前是否可以触发加网
        if (RELAY_CONTROL_TURN_ON == relayControlDriverGetCurrenStatus(MAIN_POWER_RELAY_NUMBER)) //jim 20200716 only one way on can search network
@@ -403,7 +403,7 @@ static void buttonsPressedProcess(uint8_t num)
           }
         #endif
         //end jim
-		  buttonsAppDebugPrintln("set onoff:%d,%d",emberAfEndpointFromIndex(num-1),emberAfEndpointIsEnabled(emberAfEndpointFromIndex(num-1)));
+		  buttonsAppDebugPrintln("set dianchu onoff:%d,%d",emberAfEndpointFromIndex(num-1),emberAfEndpointIsEnabled(emberAfEndpointFromIndex(num-1)));
           setButtonTrigType(num-1);
 		  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_TOGGLE_COMMAND_ID,false);
 	  }
@@ -480,7 +480,6 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 	                             ZCL_ENUM8_ATTRIBUTE_TYPE,
 	                             (uint8_t *)&temp_switch_type,
 	                             1);
-
 		}
 	}
 }
