@@ -355,6 +355,29 @@ void buttonsAppTimerEventHandler(void)
     }
 }
 
+void judgeButtonLock(uint8_t num)
+{
+	 //jim add 20200718
+#ifdef BUTTON_SPEECH_LIMIT
+	  if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
+	  {
+		 buttons_counter[num].update_flag = 1;
+		 emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
+		 return;
+	  }
+	  else
+	  {
+		buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
+		buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
+		buttons_counter[num].update_flag = 0;
+		emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
+	  }
+	  
+#endif
+	  //end jim
+
+}
+
 /**
 //函数名：buttonsPressedProcess
 //描述：按键防抖后按下的处理入口
@@ -386,45 +409,15 @@ static void buttonsPressedProcess(uint8_t num)
   {
 	  if(switch_type == SWITCH_TYPE_DIANCHU)
 	  {
-         //jim add 20200718
-        #ifdef BUTTON_SPEECH_LIMIT
-          if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
-          {
-             buttons_counter[num].update_flag = 1;
-             emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-             return;
-          }
-          else
-          {
-            buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
-            buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
-            buttons_counter[num].update_flag = 0;
-            emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-          }
-        #endif
-        //end jim
+		  judgeButtonLock(num);
 		  buttonsAppDebugPrintln("set dianchu onoff:%d,%d",emberAfEndpointFromIndex(num-1),emberAfEndpointIsEnabled(emberAfEndpointFromIndex(num-1)));
           setButtonTrigType(num-1);
 		  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_TOGGLE_COMMAND_ID,false);
 	  }
 	  else
 	  {
-         //jim add 20200718
-        #ifdef BUTTON_SPEECH_LIMIT
-          if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
-          {
-             buttons_counter[num].update_flag = 1;
-             emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-             return;
-          }
-          else
-          {
-            buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
-            buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
-            buttons_counter[num].update_flag = 0;
-            emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-          }
-        #endif
+		  judgeButtonLock(num);
+
          //end jim
 		  buttonHighCallbackProcess(num);
 	  }
@@ -601,22 +594,8 @@ static void buttonLowCallbackProcess(uint8_t num)
 		return;
 	}
 	if(num ==0 || switch_type == SWITCH_TYPE_DIANCHU) return;
-     //jim add 20200718
-    #ifdef BUTTON_SPEECH_LIMIT
-      if (buttons_counter[num].last_action_time_ms) //非零时，表示正锁定中
-      {
-         buttons_counter[num].update_flag = 1;
-         emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-         return;
-      }
-      else
-      {
-        buttons_counter[num].last_action_time_ms = halCommonGetInt16uMillisecondTick();
-        buttons_counter[num].last_action_time_ms |= 1; //确保此值大于0
-        buttons_counter[num].update_flag = 0;
-        emberEventControlSetDelayMS(delaySyncStatusControl,10); //延时更新锁定时间
-      }
-    #endif
+	judgeButtonLock(num);
+
 	buttonsAppDebugPrintln("====low:%d,%d",num,switch_type);
 
     setButtonTrigType(num-1);
