@@ -71,6 +71,7 @@ extern void unicastReportAttribute(uint16_t destination_addr,
                                    uint8_t dataSize);
 extern EmberAfStatus writeDeviceTypeAttribute(uint8_t type);
 extern void setFlashSwitchType(uint8_t type);
+extern void switchAppNetworkUpTrigReport(uint8_t type);
 
 /* 本地函数声明区 -------------------------------------------------------------- */
 static void buttonsStateCallbackProcess(uint8_t num, eButtonState state);
@@ -388,12 +389,15 @@ static void buttonsPressedProcess(uint8_t num)
 {
 	uint8_t networkStatus =0;
 	networkStatus =emberAfNetworkState();
+
+	if(getPowerOnStartingFlag())
+		return;
 #ifdef USE_ZCL_CLUSTER_SPECIFIC_COMMAND_PARSE_CALLBACK
   setOnOffClusterCommandType(num,BUTTON_CONTROL);  //切换为单播上报
 #endif
   buttonsAppDebugPrintln("pressed:%d,%d",num,switch_type);
-
-  if ((status == EMBER_NO_NETWORK) || (status == EMBER_LEAVING_NETWORK))   //按下触发加网
+  
+  if ((networkStatus == EMBER_NO_NETWORK) || (networkStatus == EMBER_LEAVING_NETWORK))   //按下触发加网
   {
     //if (num == 0)
     {
@@ -690,6 +694,7 @@ void syncButtonAndSwitchStatus(void)
     {
       for (uint8_t i=0; i<2;i++)
       {
+        buttonsAppDebugPrintln("qiaoban,[%d],switch status:%d",i+1,buttons_counter[i+1].last_button_status);
         if(0 == buttons_counter[i+1].last_button_status)
         {
            emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
@@ -700,6 +705,12 @@ void syncButtonAndSwitchStatus(void)
         }
       }
     }
+	else
+	{
+		for (uint8_t i=0; i<2;i++)
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
+	}
+	switchAppNetworkUpTrigReport(0);
   if (networkStatus == EMBER_NO_NETWORK)   //按下触发加网
   {
     if (buttons_counter[1].last_button_status)  //第一路上电5s后是打开的

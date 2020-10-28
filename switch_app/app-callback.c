@@ -91,7 +91,7 @@ bool reportingPluginCheckReportConfigExist(uint8_t endpoint,
 #endif
 /* 本地函数声明区 -------------------------------------------------------------- */
 static void relayControlFinishedCallback(uint8_t way, uint8_t status);
-static void switchAppNetworkUpTrigReport(void);
+void switchAppNetworkUpTrigReport(uint8_t type);
 //static void batteryCapacityUpdateCallback(tBatteryWorkRecord *battery_record);
 static uint8_t readDeviceTypeAttribute(void);
 static void reportDeviceType(void);
@@ -197,6 +197,22 @@ void appPowerOnOperationHandler(void)
 	emberEventControlSetInactive(appPowerOnOperationControl);
 	poweron_flg = false;
     syncButtonAndSwitchStatus();
+	customAppDebugPrintln("appPowerOnOperationHandler");
+}
+
+/**
+//函数名：reportingPluginCheckReportConfigExist
+//描述：处理onoffcluster指令前的回调，通过此可以控制是否需要每次都更新属性值。
+//参数：endpoint               (uint8_t [输入], 指令控制的本地端点;)
+//      currentValue           (bool    [输入], 当前属性中的开关值;)
+//      command                (uint8_t [输入], 当前的指令动作;)
+//      initiatedByLevelChange (bool    [输入], 开关是否与level值关联;)
+//返回：bool, true SDK代码处理，当前动作与属性值相同时不写属性；false 不管动作，直接更新属性；
+*/
+bool onOffClusterSetValueCommandCallback(uint8_t endpoint, bool currentValue,
+                                         uint8_t command,bool initiatedByLevelChange)
+{
+	return false;
 }
 
 /**
@@ -214,8 +230,6 @@ void appPowerOnInit(void)
   relayContorlDriverTaskInit(relayControlFinishedCallback);      //继电器控制脚驱动初始化,注册继电器控制完成后的一个回调。
   relayControlBufferInitial();                                   //初始化继电器控制缓存器，用来防止继电器同时动作。
   buttonsAppInit();                                              //初始化按键，驱动和按键逻辑变量初始化。
-  //batteryCapacityCaculateInit(batteryCapacityUpdateCallback); //电池电量检测初始化，注册电量运算完成回调。
-
   local_ways = switchWaysConfigGetWays();
 
   customAppDebugPrintln("main init,ways=%d,device type:%d",local_ways,getFlashDeviceType());
@@ -379,7 +393,7 @@ bool emberAfStackStatusCallback(EmberStatus status)
   networkStatusChangeProcess(status);
   if (EMBER_NETWORK_UP == status)
   {
-    switchAppNetworkUpTrigReport();
+    switchAppNetworkUpTrigReport(1);
     checkToStartIdentifyCoordinatorManufacturer(1500);                  //判断是否需要启动获取网关信息
     //休眠设备部分的设定
     #ifdef MODULE_CHANGE_NODETYPE
@@ -539,31 +553,40 @@ EmberStatus emberAfRemoteSetBindingPermissionCallback(const EmberBindingTableEnt
 /**
 //函数名：switchAppNetworkUpTrigReport
 //描述：设备入网后触发onoff属性report
-//参数：无
+//参数：type: 1 为翘板开关类型 其他值为onoff报告
 //返回：void
 */
-static void switchAppNetworkUpTrigReport(void)
+void switchAppNetworkUpTrigReport(uint8_t type)
 {
   uint8_t endpoint;
-  for (uint8_t i=0; i<local_ways; i++)
-  {
-    endpoint = emberAfEndpointFromIndex(i);
-    if (endpoint != 0xFF)
-    {
-  #ifdef REPORTING_CALLBACK_CODE
-      reportingPluginTrigReport(endpoint,
-                                ZCL_ON_OFF_CLUSTER_ID,
-                                ZCL_ON_OFF_ATTRIBUTE_ID,
-                                10+i,
-                                2000); //随机时间上电后每个节点后延一秒
-      customAppDebugPrintln("+++network up onoff report");
-  #endif
-    }
-	#ifdef MODULE_CHANGE_NODETYPE
-	reportDeviceType();
-	#endif
-	reportSwitchType();
-  }
+
+	if(type ==1)
+	{
+		#ifdef MODULE_CHANGE_NODETYPE
+		reportDeviceType();
+		#endif
+		reportSwitchType();
+	}
+	else
+	{
+		for (uint8_t i=0; i<local_ways; i++)
+		{
+		  endpoint = emberAfEndpointFromIndex(i);
+		  if (endpoint != 0xFF)
+		  {
+			#ifdef REPORTING_CALLBACK_CODE
+			reportingPluginTrigReport(endpoint,
+									  ZCL_ON_OFF_CLUSTER_ID,
+									  ZCL_ON_OFF_ATTRIBUTE_ID,
+									  2+i,
+									  2000); //随机时间上电后每个节点后延一秒
+			customAppDebugPrintln("+++network up onoff report");
+			#endif
+		  }
+		
+		}
+
+	}
 }
 #ifdef REPORTING_CALLBACK_CODE
 /**
@@ -824,7 +847,7 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
 	{
 		if(poweron_flg)
 		{
-			poweron_flg = false; //刚上电不会跑下面重启
+			//poweron_flg = false; //刚上电不会跑下面重启
 			return;
 		}
 		if (emberAfReadServerAttribute(endpoint,
