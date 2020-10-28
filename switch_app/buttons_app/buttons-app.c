@@ -451,7 +451,8 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 	EmberAfStatus status =EMBER_ZCL_STATUS_SUCCESS;
 	uint8_t temp_switch_type =0;
 	temp_switch_type =getSwitchType();
-
+    buttonsAppDebugPrintln("the network:%d, val:%d",emberAfNetworkState(),temp_switch_type);
+	
 	if(num ==0)
 	{
 		if(emberAfNetworkState() !=EMBER_JOINED_NETWORK)
@@ -470,6 +471,7 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 		if(emberAfNetworkState() ==EMBER_JOINED_NETWORK)
 		{
 			//在网络内强制发一个开关类型报告
+
 	      unicastReportAttribute(0x0000,0x01,
 	                             0x01,
 	                             ZCL_BASIC_CLUSTER_ID,
@@ -543,9 +545,12 @@ static void buttonsTwoShortLongPressedProcess(uint8_t num)
 */
 static void buttonsFourShortLongPressedProcess(uint8_t num)
 {
-  buttonsAppDebugPrintln("Reset");
-  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
-  ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
+  if (num == 0)
+  {
+	  buttonsAppDebugPrintln("Reset");
+	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
+	  ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
+  }
 }
 
 /**

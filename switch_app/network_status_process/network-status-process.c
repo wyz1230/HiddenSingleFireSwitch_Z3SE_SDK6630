@@ -58,24 +58,33 @@ void clearOtaStorageTempDataAll(void)
 {
   uint32_t current_address;
   uint8_t status = EEPROM_SUCCESS, i = 0;
-
+  uint32_t page_size;
+  page_size = emberAfPluginEepromInfo()->pageSize; //此处从EEPROM信息中获取，避免有些flash page大小不同的问题
   current_address = EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_STORAGE_START;
 
     for (i = 0; i < 3; i++) //出错时试三次
     {
-      status = emberAfPluginEepromErase(current_address, 4096);
+      status = emberAfPluginEepromErase(current_address, page_size);
       if (status == EEPROM_SUCCESS)
       {
         break;
       }
+      else
+      {
+        networkStatusProcDebugPrintln("erase ota file error!");
+      }
     }
-    current_address = EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_STORAGE_END - 4096;
+    current_address = EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_STORAGE_END - page_size;
      for (i = 0; i < 3; i++) //出错时试三次
      {
-      status = emberAfPluginEepromErase(current_address, 4096);
+      status = emberAfPluginEepromErase(current_address, page_size);
       if (status == EEPROM_SUCCESS)
       {
         break;
+      }
+      else
+      {
+        networkStatusProcDebugPrintln("erase ota file error!");
       }
     }
 }
@@ -114,7 +123,8 @@ bool checkAtrributeNeedToResetDefaultCallback(uint8_t endpoint,
            (ZCL_APPLICATION_VERSION_ATTRIBUTE_ID == attributeId) ||
            (ZCL_MANUFACTURER_NAME_ATTRIBUTE_ID == attributeId) ||
            (ZCL_DATE_CODE_ATTRIBUTE_ID == attributeId) ||
-           (ZCL_SW_BUILD_ID_ATTRIBUTE_ID == attributeId))
+           (ZCL_SW_BUILD_ID_ATTRIBUTE_ID == attributeId) ||
+           (ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID == attributeId)) 
        {
          networkStatusProcDebugPrintln(" Unreset ep=%d,cluID=%ld,attID=%ld",endpoint,clusterId,attributeId);
          return false;  //model id不需要恢复出厂默认值
@@ -225,10 +235,14 @@ void networkStatusChangeProcess(EmberStatus status)
      default: //不在网，有可能是离网，也有可能是找不到父节点，对于路由设备没有找不到父节点的问题。
        if (emberAfNetworkState() == EMBER_NO_NETWORK)
        {
-	     if (EMBER_NETWORK_DOWN == status)
-         {
-           nodeInfoDeafultReset(); //节点信息恢复出厂默认设定
-	     }
+		 if (EMBER_NETWORK_DOWN == status)
+		 {
+			if (emberAfNetworkState() == EMBER_NO_NETWORK)
+			{
+			  nodeInfoDeafultReset(); //节点信息恢复出厂默认设定
+			}
+		 }
+		 
          if (network_status_action != NETWORK_ACTION_START_JOIN) //没在加网过程时，更新离网指示灯，如果在加网过程，会影响加网指示灯。
          {
            ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
@@ -321,7 +335,7 @@ void networkActionPollingEventHandler(void)
     return;
   }
 #endif
-  networkStatusProcDebugPrintln("poll count=%d,Action=%d",network_status_action_overtime,network_status_action);
+  //networkStatusProcDebugPrintln("poll count=%d,Action=%d",network_status_action_overtime,network_status_action);
 
   if (NETWORK_ACTION_LEAVE == network_status_action) //只离网
   {

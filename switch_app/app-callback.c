@@ -406,7 +406,7 @@ bool emberAfStackStatusCallback(EmberStatus status)
     #ifdef MODULE_CHANGE_NODETYPE
 	}
     #endif
-	customAppDebugPrintln("wyz->EMBER_NETWORK_ON\r\n"); //wyz add
+	customAppDebugPrintln("wyz->EMBER_NETWORK_ON:%d\r\n",getDeviceType()); //wyz add
 	customAppDebugPrintln("wyz chn: %d\r\n",emberAfGetRadioChannel());
 	customAppDebugPrintln("wyz node ID: %2x\r\n",emberAfGetNodeId());
   }
@@ -1044,7 +1044,16 @@ static void reportDeviceType(void)
 static void reportSwitchType(void)
 {
 	uint8_t temp;
-
+    temp =getFlashSwitchType();
+	unicastReportAttribute(0x0000,0x01,
+						   emberAfEndpointFromIndex(0),
+						   ZCL_BASIC_CLUSTER_ID,
+						   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
+						   ZCL_ENUM8_ATTRIBUTE_TYPE,
+						   (uint8_t *)&temp,
+						   1);
+	customAppDebugPrintln("poweron report qiaoban or huitan:%d",temp);	
+	#if 0
 	if(	emberAfReadAttribute(emberAfEndpointFromIndex(0),
 								ZCL_BASIC_CLUSTER_ID,
 								ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
@@ -1053,17 +1062,10 @@ static void reportSwitchType(void)
 								sizeof(temp),
 								NULL) ==EMBER_ZCL_STATUS_SUCCESS)
 	{
-		unicastReportAttribute(0x0000,0x01,
-							   emberAfEndpointFromIndex(0),
-							   ZCL_BASIC_CLUSTER_ID,
-							   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-							   ZCL_ENUM8_ATTRIBUTE_TYPE,
-							   (uint8_t *)&temp,
-							   1);
-		customAppDebugPrintln("poweron report qiaoban or huitan");
+
 
 	}
-
+    #endif
 }
 #endif
 //jim add 20200717
