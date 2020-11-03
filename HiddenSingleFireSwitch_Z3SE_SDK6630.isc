@@ -1125,4 +1125,4 @@ AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]
 AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]~radio[010]~flash[768K]~temp[I]~package[M]~pins[32]~!module+none+iar):EMBER_AF_PLUGIN_NETWORK_STEERING_SCAN_DURATION,3
 AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]~radio[010]~flash[768K]~temp[I]~package[M]~pins[32]~!module+none+iar):EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER,6
 AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]~radio[010]~flash[768K]~temp[I]~package[M]~pins[32]~!module+none+iar):EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_IMAGE_TYPE_ID,29
-AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]~radio[010]~flash[768K]~temp[I]~package[M]~pins[32]~!module+none+iar):EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_FIRMWARE_VERSION,102
+AppPluginOption(efr32~family[M]~series[2]~device_configuration[1]~performance[A]~radio[010]~flash[768K]~temp[I]~package[M]~pins[32]~!module+none+iar):EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_FIRMWARE_VERSION,200

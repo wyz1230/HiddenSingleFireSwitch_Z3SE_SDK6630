@@ -112,7 +112,7 @@
                 </option>
                 <option>
                     <name>RTConfigPath2</name>
-                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
+                    <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
@@ -255,6 +255,7 @@
                     <state>ORB_PRODUCTION_TEST_CODE</state>
                     <state>USE_CUSTOM_PRE_IDLE_SLEEP_PROC_CODE</state>
                     <state>PREVENT_LONG_TIME_AWAKE_CODE</state>
+                    <state>ON_OFF_CLUSTER_COMMAND_SET_CALLBACK_CODE</state>
                     <state>EMBER_AF_API_EMBER_TYPES="stack/include/ember-types.h"</state>
                     <state>EMBER_AF_API_DEBUG_PRINT="app/framework/util/print.h"</state>
                     <state>EMBER_AF_API_AF_HEADER="app/framework/include/af.h"</state>
@@ -264,7 +265,6 @@
                     <state>USE_NVM3</state>
                     <state>NVM3_DEFAULT_NVM_SIZE=NVM3_FLASH_PAGES*FLASH_PAGE_SIZE</state>
                     <state>EMLIB_USER_CONFIG</state>
-                    <state>ON_OFF_CLUSTER_COMMAND_SET_CALLBACK_CODE</state>
                     <state>APPLICATION_TOKEN_HEADER="znet-token.h"</state>
                     <state>APPLICATION_MFG_TOKEN_HEADER="znet-mfg-token.h"</state>
                     <state>MBEDTLS_DEVICE_ACCELERATION_CONFIG_FILE="configs/config-device-acceleration.h"</state>
@@ -664,6 +664,7 @@
                     <state>ORB_PRODUCTION_TEST_CODE</state>
                     <state>USE_CUSTOM_PRE_IDLE_SLEEP_PROC_CODE</state>
                     <state>PREVENT_LONG_TIME_AWAKE_CODE</state>
+                    <state>ON_OFF_CLUSTER_COMMAND_SET_CALLBACK_CODE</state>
                     <state>EMBER_AF_API_EMBER_TYPES="stack/include/ember-types.h"</state>
                     <state>EMBER_AF_API_DEBUG_PRINT="app/framework/util/print.h"</state>
                     <state>EMBER_AF_API_AF_HEADER="app/framework/include/af.h"</state>
@@ -673,7 +674,6 @@
                     <state>USE_NVM3</state>
                     <state>NVM3_DEFAULT_NVM_SIZE=NVM3_FLASH_PAGES*FLASH_PAGE_SIZE</state>
                     <state>EMLIB_USER_CONFIG</state>
-                    <state>ON_OFF_CLUSTER_COMMAND_SET_CALLBACK_CODE</state>
                     <state>APPLICATION_TOKEN_HEADER="znet-token.h"</state>
                     <state>APPLICATION_MFG_TOKEN_HEADER="znet-mfg-token.h"</state>
                     <state>MBEDTLS_DEVICE_ACCELERATION_CONFIG_FILE="configs/config-device-acceleration.h"</state>
