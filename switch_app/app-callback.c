@@ -478,6 +478,34 @@ void emberAfOnOffClusterServerAttributeChangedCallback(uint8_t endpoint,
             updateAndTrigeRelayControlBufferNextAction(i, RELAY_CONTROL_TURN_ON, 10, true);
           }
           customAppDebugPrintln("get on off attribute=%d",on_off);
+			//jim add 20200612 对接美的网关
+			#if 1
+          uint16_t delay_max_random_ms = 0;
+          uint16_t delay_time_ms = 100;
+          switch (getOnOffClusterCommandType(i))
+          {
+            case SCENE_CONTROL:       //场景控制
+            case MULTICAST_CONTROL:   //多播控制
+            case BROADCAST_CONTROL:   //广播控制
+               delay_max_random_ms = 500; //500ms随机
+               delay_time_ms = i*500;
+              break;
+            default:  //单播和按键触发的，按正常的上报机制处理
+               delay_max_random_ms = 50; //50ms随机
+               delay_time_ms = i*100;
+              break;
+          }
+        #ifdef REPORTING_CALLBACK_CODE
+          reportingPluginTrigReport(endpoint,
+                                    ZCL_ON_OFF_CLUSTER_ID,
+                                    ZCL_ON_OFF_ATTRIBUTE_ID,
+                                    delay_time_ms,
+                                    delay_max_random_ms); //随机时间上电后每个节点后延一秒
+          customAppDebugPrintln("attribute change trig report");
+        #endif
+          setOnOffClusterCommandType(i,UNICAST_CONTROL);  //切换为单播上报
+		#endif
+		//end jim		  
         }
         break;
       }
