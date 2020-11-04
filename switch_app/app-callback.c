@@ -472,7 +472,7 @@ void emberAfOnOffClusterServerAttributeChangedCallback(uint8_t endpoint,
             //relayControlDriverTrigeOnOffAction(i,RELAY_CONTROL_TURN_OFF, 0); //指示灯切换在relay contorl的call back函数里处理
             updateAndTrigeRelayControlBufferNextAction(i, RELAY_CONTROL_TURN_OFF, delay_ms, true);
           }
-          else
+          else if(0x01 == on_off)
           {
             //relayControlDriverTrigeOnOffAction(i,RELAY_CONTROL_TURN_ON, 0); //指示灯切换在relay contorl的call back函数里处理
             updateAndTrigeRelayControlBufferNextAction(i, RELAY_CONTROL_TURN_ON, 10, true);

@@ -37,7 +37,7 @@
 //#define AWAYS_IN_TEST_MODE              //使设备一直处于产测模式。为了方便测试产测功能用，正常功能不打开。正常产品一定需要关闭
 //#define CACULATE_AUTHORIZATION_ENABLE   //是否使用授权码运算返回，自测获取授权码用。正常产品一定需要关闭
 //#define AUTHORISATION_TEST_KEY          //验证制具授权公式用的特别key，验证后去掉此宏，变为产品的运算Key。正常产品一定需要关闭
-#define PASS_AUTHORISATION_CHECK
+//#define PASS_AUTHORISATION_CHECK
 
 //#define AUTO_INSTALL_AUTHORIZATION_CODE_AFTER_OTA   //打开此宏定义，支持设备上电在网时自动安装授权码，解决旧产品没授权码，通过ota后能正常使用
 #ifdef AUTO_INSTALL_AUTHORIZATION_CODE_AFTER_OTA

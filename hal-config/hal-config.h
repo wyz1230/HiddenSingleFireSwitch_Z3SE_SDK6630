@@ -133,7 +133,7 @@
 // $[SERIAL]
 #define BSP_SERIAL_APP_PORT                      (HAL_SERIAL_PORT_USART0)
 #define BSP_SERIAL_ASSERT_PORT                   (HAL_SERIAL_PORT_USART0)
-#define HAL_SERIAL_RXWAKE_ENABLE                 (0)
+#define HAL_SERIAL_RXWAKE_ENABLE                 (1)
 #define HAL_SERIAL_IDLE_WAKE_ENABLE              (1)
 #define HAL_SERIAL_USART0_ENABLE                 (1)
 #define HAL_SERIAL_USART1_ENABLE                 (0)
@@ -228,7 +228,6 @@
 #if defined(_SILICON_LABS_MODULE)
 #include "sl_module.h"
 #endif
-
 
 #endif /* HAL_CONFIG_H */
 

@@ -39,6 +39,7 @@
     <property object="SERIAL" propertyId="ABPeripheral.included" value="true"/>
     <property object="SERIAL" propertyId="SERIAL.BSP_SERIAL_APP_PORT.MOD" value="USART0"/>
     <property object="SERIAL" propertyId="SERIAL.BSP_SERIAL_ASSERT_PORT.MOD" value="USART0"/>
+    <property object="SERIAL" propertyId="SERIAL.HAL_SERIAL_RXWAKE_ENABLE.BOOL" value="1"/>
     <property object="SERIAL" propertyId="SERIAL.HAL_SERIAL_USART0_ENABLE.BOOL" value="1"/>
     <property object="SERIAL" propertyId="SERIAL.showadvanced.BOOL" value="1"/>
     <property object="USART0" propertyId="ABPeripheral.included" value="true"/>
