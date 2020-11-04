@@ -526,7 +526,7 @@ static void relayControlFinishedCallback(uint8_t way, uint8_t status)
   {
       //闪灯触发
     networkStatusUpdateShow();
-    customAppDebugPrintln("way=%d,contorl finished",way);
+    customAppDebugPrintln("way=%d,contorl finished:%d",way,status);
   }
   updateAndTrigeRelayControlBufferNextAction(way, 0, 0, false); //结束后，需要更把最后在add_flg参数填false,触发一次动作更新。
  // batteryVoltageFifoUpdate(); //jim for test voltage detect

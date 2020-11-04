@@ -37,7 +37,7 @@
 //#define AWAYS_IN_TEST_MODE              //使设备一直处于产测模式。为了方便测试产测功能用，正常功能不打开。正常产品一定需要关闭
 //#define CACULATE_AUTHORIZATION_ENABLE   //是否使用授权码运算返回，自测获取授权码用。正常产品一定需要关闭
 //#define AUTHORISATION_TEST_KEY          //验证制具授权公式用的特别key，验证后去掉此宏，变为产品的运算Key。正常产品一定需要关闭
-//#define PASS_AUTHORISATION_CHECK
+#define PASS_AUTHORISATION_CHECK
 
 //#define AUTO_INSTALL_AUTHORIZATION_CODE_AFTER_OTA   //打开此宏定义，支持设备上电在网时自动安装授权码，解决旧产品没授权码，通过ota后能正常使用
 #ifdef AUTO_INSTALL_AUTHORIZATION_CODE_AFTER_OTA
@@ -72,7 +72,7 @@
 
 //频偏参数默认值定义，注意按产品的RF参数来设定，没定义默认值和产测没修改ctune值时，会按SDK里的默认设定处理。
 #ifdef USED_CUSTOM_HFX_CTUNE_CODE
-   #define CUSTOM_HFX_CTUNE_DEFAULT_VALUE        (0x75) //定义频偏参数默认值
+   #define CUSTOM_HFX_CTUNE_DEFAULT_VALUE        (0x190) //定义频偏参数默认值
 #endif
 
 // The max packet size for 802.15.4 is 128, minus 1 byte for the length, and 2 bytes for the CRC.

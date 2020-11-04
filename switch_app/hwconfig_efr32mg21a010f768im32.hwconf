@@ -11,7 +11,7 @@
     <property object="BUTTON" propertyId="BUTTON.HAL_BUTTON_ENABLE.ARRAY" value="0, 1, 2"/>
     <property object="BUTTON" propertyId="BUTTON.showadvanced.BOOL" value="1"/>
     <property object="CMU" propertyId="ABPeripheral.included" value="true"/>
-    <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_CTUNE.INT" value="117"/>
+    <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_CTUNE.INT" value="400"/>
     <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_PRESENT.BOOL" value="1"/>
     <property object="CMU" propertyId="CMU.HAL_CLK_EM23CLK_SOURCE.ENUM" value="HAL_CLK_LFCLK_SOURCE_LFRCO"/>
     <property object="CMU" propertyId="CMU.HAL_CLK_EM4CLK_SOURCE.ENUM" value="HAL_CLK_LFCLK_SOURCE_LFRCO"/>

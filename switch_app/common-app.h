@@ -35,7 +35,7 @@
 #include "production_test/production-test.h"
 
 /* 宏定义区 -------------------------------------------------------------------- */
-//#define MIX_SW_APP_DEBUG_ENABLE
+#define MIX_SW_APP_DEBUG_ENABLE
 //#define LED_APP_DEBUG_ENABLE
 //#define LED_DRIVER_DEBUG_ENABLE
 //#define BUTTON_DRIVER_DEBUG_ENABLE
@@ -91,8 +91,8 @@
   #warning "ota file version undefine!"
 #endif
 #define ORB_MANUFACTURE_NAME_STRING      "ORVIBO"
-#define ORB_DATE_CODE_STRING             "20201103"
-#define ORB_SW_BUILD_ID_STRING           "2.0.0"
+#define ORB_DATE_CODE_STRING             "20201104"
+#define ORB_SW_BUILD_ID_STRING           "1.9.9"
 
 #define ORB_PRODUCT_NAME_STRING          "SingleFireSwitch-MG21"
 #define ORB_OTHER_INFO_STRING            "EFR32"
