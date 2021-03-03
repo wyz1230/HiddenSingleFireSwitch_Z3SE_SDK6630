@@ -26350,6 +26350,198 @@ bool emberAfSlWwahClusterUseTrustCenterForClusterServerResponseCallback(uint8_t 
 
 /** @} END SL Works With All Hubs Cluster Callbacks */
 
+/** @name OrviboPrivate Cluster Callbacks */
+// @{
+
+/** @brief OrviboPrivate Cluster Client Attribute Changed
+ *
+ * Client Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute that changed  Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientAttributeChangedCallback(uint8_t endpoint,
+                                                               EmberAfAttributeId attributeId);
+/** @brief OrviboPrivate Cluster Client Default Response
+ *
+ * This function is called when the client receives the default response from
+ * the server.
+ *
+ * @param endpoint Destination endpoint  Ver.: always
+ * @param commandId Command id  Ver.: always
+ * @param status Status in default response  Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientDefaultResponseCallback(uint8_t endpoint,
+                                                              uint8_t commandId,
+                                                              EmberAfStatus status);
+/** @brief OrviboPrivate Cluster Client Init
+ *
+ * Client Init
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientInitCallback(uint8_t endpoint);
+/** @brief OrviboPrivate Cluster Client Manufacturer Specific Attribute Changed
+ *
+ * Client Manufacturer Specific Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute that changed  Ver.: always
+ * @param manufacturerCode Manufacturer Code of the attribute that changed 
+ * Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientManufacturerSpecificAttributeChangedCallback(uint8_t endpoint,
+                                                                                   EmberAfAttributeId attributeId,
+                                                                                   uint16_t manufacturerCode);
+/** @brief OrviboPrivate Cluster Client Message Sent
+ *
+ * Client Message Sent
+ *
+ * @param type The type of message sent  Ver.: always
+ * @param indexOrDestination The destination or address to which the message was
+ * sent  Ver.: always
+ * @param apsFrame The APS frame for the message  Ver.: always
+ * @param msgLen The length of the message  Ver.: always
+ * @param message The message that was sent  Ver.: always
+ * @param status The status of the sent message  Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                          uint16_t indexOrDestination,
+                                                          EmberApsFrame *apsFrame,
+                                                          uint16_t msgLen,
+                                                          uint8_t *message,
+                                                          EmberStatus status);
+/** @brief OrviboPrivate Cluster Client Pre Attribute Changed
+ *
+ * Client Pre Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute to be changed  Ver.: always
+ * @param attributeType Attribute type  Ver.: always
+ * @param size Attribute size  Ver.: always
+ * @param value Attribute value  Ver.: always
+ */
+EmberAfStatus emberAfOrviboPrivateClusterClientPreAttributeChangedCallback(uint8_t endpoint,
+                                                                           EmberAfAttributeId attributeId,
+                                                                           EmberAfAttributeType attributeType,
+                                                                           uint8_t size,
+                                                                           uint8_t *value);
+/** @brief OrviboPrivate Cluster Client Tick
+ *
+ * Client Tick
+ *
+ * @param endpoint Endpoint that is being served  Ver.: always
+ */
+void emberAfOrviboPrivateClusterClientTickCallback(uint8_t endpoint);
+/** @brief OrviboPrivate Cluster Orb Re Start Device
+ *
+ * 
+ *
+ */
+bool emberAfOrviboPrivateClusterOrbReStartDeviceCallback(void);
+/** @brief OrviboPrivate Cluster Orb Re Start Device Response
+ *
+ * 
+ *
+ * @param status   Ver.: always
+ */
+bool emberAfOrviboPrivateClusterOrbReStartDeviceResponseCallback(uint8_t status);
+/** @brief OrviboPrivate Cluster Reset Device
+ *
+ * 
+ *
+ */
+bool emberAfOrviboPrivateClusterResetDeviceCallback(void);
+/** @brief OrviboPrivate Cluster Reset Device Response
+ *
+ * 
+ *
+ * @param status   Ver.: always
+ */
+bool emberAfOrviboPrivateClusterResetDeviceResponseCallback(uint8_t status);
+/** @brief OrviboPrivate Cluster Server Attribute Changed
+ *
+ * Server Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute that changed  Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
+                                                               EmberAfAttributeId attributeId);
+/** @brief OrviboPrivate Cluster Server Default Response
+ *
+ * This function is called when the server receives the default response from
+ * the client.
+ *
+ * @param endpoint Destination endpoint  Ver.: always
+ * @param commandId Command id  Ver.: always
+ * @param status Status in default response  Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerDefaultResponseCallback(uint8_t endpoint,
+                                                              uint8_t commandId,
+                                                              EmberAfStatus status);
+/** @brief OrviboPrivate Cluster Server Init
+ *
+ * Server Init
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerInitCallback(uint8_t endpoint);
+/** @brief OrviboPrivate Cluster Server Manufacturer Specific Attribute Changed
+ *
+ * Server Manufacturer Specific Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute that changed  Ver.: always
+ * @param manufacturerCode Manufacturer Code of the attribute that changed 
+ * Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerManufacturerSpecificAttributeChangedCallback(uint8_t endpoint,
+                                                                                   EmberAfAttributeId attributeId,
+                                                                                   uint16_t manufacturerCode);
+/** @brief OrviboPrivate Cluster Server Message Sent
+ *
+ * Server Message Sent
+ *
+ * @param type The type of message sent  Ver.: always
+ * @param indexOrDestination The destination or address to which the message was
+ * sent  Ver.: always
+ * @param apsFrame The APS frame for the message  Ver.: always
+ * @param msgLen The length of the message  Ver.: always
+ * @param message The message that was sent  Ver.: always
+ * @param status The status of the sent message  Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerMessageSentCallback(EmberOutgoingMessageType type,
+                                                          uint16_t indexOrDestination,
+                                                          EmberApsFrame *apsFrame,
+                                                          uint16_t msgLen,
+                                                          uint8_t *message,
+                                                          EmberStatus status);
+/** @brief OrviboPrivate Cluster Server Pre Attribute Changed
+ *
+ * Server Pre Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute to be changed  Ver.: always
+ * @param attributeType Attribute type  Ver.: always
+ * @param size Attribute size  Ver.: always
+ * @param value Attribute value  Ver.: always
+ */
+EmberAfStatus emberAfOrviboPrivateClusterServerPreAttributeChangedCallback(uint8_t endpoint,
+                                                                           EmberAfAttributeId attributeId,
+                                                                           EmberAfAttributeType attributeType,
+                                                                           uint8_t size,
+                                                                           uint8_t *value);
+/** @brief OrviboPrivate Cluster Server Tick
+ *
+ * Server Tick
+ *
+ * @param endpoint Endpoint that is being served  Ver.: always
+ */
+void emberAfOrviboPrivateClusterServerTickCallback(uint8_t endpoint);
+
+/** @} END OrviboPrivate Cluster Callbacks */
+
 
 /** @name EEPROM Plugin Callbacks */
 // @{

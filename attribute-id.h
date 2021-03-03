@@ -4761,4 +4761,18 @@
 #define ZCL_SL_WWAH_CLUSTER_REPORTING_STATUS_SERVER_ATTRIBUTE_ID     0xFFFE // Ver.: since zcl-6.0-15-02017-001
 
 
+// Attribute types for cluster: OrviboPrivate
+// Cluster specification level: zcl-7.0-07-5123-07
+
+// Client attributes
+#define ZCL_ORVIBO_PRIVATE_CLUSTER_CLUSTER_REVISION_CLIENT_ATTRIBUTE_ID 0xFFFD // Ver.: since zcl-6.0-15-02017-001
+#define ZCL_ORVIBO_PRIVATE_CLUSTER_REPORTING_STATUS_CLIENT_ATTRIBUTE_ID 0xFFFE // Ver.: since zcl-6.0-15-02017-001
+
+// Server attributes
+#define ZCL_POWER_ON_STATUS_ATTRIBUTE_ID                                0x0001 // Ver.: always
+#define ZCL_AUTH_CODE_ATTRIBUTE_ID                                      0xFF00 // Ver.: always
+#define ZCL_ORVIBO_PRIVATE_CLUSTER_CLUSTER_REVISION_SERVER_ATTRIBUTE_ID 0xFFFD // Ver.: since zcl-6.0-15-02017-001
+#define ZCL_ORVIBO_PRIVATE_CLUSTER_REPORTING_STATUS_SERVER_ATTRIBUTE_ID 0xFFFE // Ver.: since zcl-6.0-15-02017-001
+
+
 #endif // SILABS_EMBER_AF_ATTRIBUTE_ID

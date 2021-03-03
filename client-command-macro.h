@@ -14893,6 +14893,71 @@
 /** @} END SL Works With All Hubs Commands */
 
 
+/** @name OrviboPrivate Commands */
+// @{
+/** @brief Command description for Reset Device
+ *
+ * Cluster: OrviboPrivate, Attributes and commands for light private configuration and manipulation.
+ * Command: ResetDevice
+ */
+#define emberAfFillCommandOrviboPrivateClusterResetDevice() \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND \
+                             | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER\
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK), \
+                            ZCL_ORVIBO_PRIVATE_CLUSTER_ID, \
+                            ZCL_RESET_DEVICE_COMMAND_ID, \
+                            "");
+
+
+/** @brief Command description for ReStart Device
+ *
+ * Cluster: OrviboPrivate, Attributes and commands for light private configuration and manipulation.
+ * Command: OrbReStartDevice
+ */
+#define emberAfFillCommandOrviboPrivateClusterOrbReStartDevice() \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND \
+                             | ZCL_FRAME_CONTROL_CLIENT_TO_SERVER\
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK), \
+                            ZCL_ORVIBO_PRIVATE_CLUSTER_ID, \
+                            ZCL_ORB_RE_START_DEVICE_COMMAND_ID, \
+                            "");
+
+
+/** @brief Command description for reset device Response
+ *
+ * Cluster: OrviboPrivate, Attributes and commands for light private configuration and manipulation.
+ * Command: ResetDeviceResponse
+ * @param status uint8_t
+ */
+#define emberAfFillCommandOrviboPrivateClusterResetDeviceResponse(status) \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND \
+                             | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT\
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK), \
+                            ZCL_ORVIBO_PRIVATE_CLUSTER_ID, \
+                            ZCL_RESET_DEVICE_RESPONSE_COMMAND_ID, \
+                            "u", \
+                            status);
+
+
+/** @brief Command description for reStart device Response
+ *
+ * Cluster: OrviboPrivate, Attributes and commands for light private configuration and manipulation.
+ * Command: OrbReStartDeviceResponse
+ * @param status uint8_t
+ */
+#define emberAfFillCommandOrviboPrivateClusterOrbReStartDeviceResponse(status) \
+  emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND \
+                             | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT\
+                             | ZCL_DISABLE_DEFAULT_RESPONSE_MASK), \
+                            ZCL_ORVIBO_PRIVATE_CLUSTER_ID, \
+                            ZCL_ORB_RE_START_DEVICE_RESPONSE_COMMAND_ID, \
+                            "u", \
+                            status);
+
+
+/** @} END OrviboPrivate Commands */
+
+
 
 
 

@@ -29,9 +29,10 @@
 
 #define NETWORK_JOINING_POLL_TIME_MS            (2000) //2秒的轮询扫描入网间隔
 
-//#define NETWORK_JOINING_TIMEOUT_ENABLE                 //加网超时开关,没定义时加网不超时
-#define NETWORK_JOINING_TIMEOUT_S               (60)   //1分钟加网超时
+#define NETWORK_JOINING_TIMEOUT_ENABLE                 //加网超时开关,没定义时加网不超时
+#define NETWORK_JOINING_TIMEOUT_S               (3*60)   //1分钟加网超时
 #define NETWORK_JOINING_TIMEOUT_COUNTS          (NETWORK_JOINING_TIMEOUT_S*1000/NETWORK_JOINING_POLL_TIME_MS)  //换算为周期个数
+
 
 /* 自定义类型区 ---------------------------------------------------------------- */
 
@@ -405,7 +406,7 @@ void networkActionPollingEventHandler(void)
 	  {
         ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_JOINING);
        #ifdef ORB_PRODUCTION_TEST_CODE  //产测模式判断处理
-        if (authorizationPass() == true)
+        //if (authorizationPass() == true)
        #endif
         {
            emberAfPluginNetworkSteeringStart(); //触发扫描入网
@@ -424,7 +425,7 @@ void networkActionPollingEventHandler(void)
     #else
       ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_JOINING);
       #ifdef ORB_PRODUCTION_TEST_CODE  //产测模式判断处理
-        if (authorizationPass() == true)
+        //if (authorizationPass() == true)
       #endif
         {
           if (RELAY_CONTROL_TURN_OFF == relayControlDriverGetCurrenStatus(MAIN_POWER_RELAY_NUMBER)) //jim 20200717

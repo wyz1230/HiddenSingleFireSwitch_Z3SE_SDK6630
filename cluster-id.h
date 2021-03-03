@@ -139,4 +139,5 @@
 #define ZCL_OTA_CONFIGURATION_CLUSTER_ID                                   0xFC01
 #define ZCL_MFGLIB_CLUSTER_ID                                              0xFC02
 #define ZCL_SL_WWAH_CLUSTER_ID                                             0xFC57
+#define ZCL_ORVIBO_PRIVATE_CLUSTER_ID                                      0xFF00
 #endif // SILABS_EMBER_AF_CLUSTER_ID

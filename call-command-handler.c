@@ -76,6 +76,9 @@ EmberAfStatus emberAfClusterSpecificCommandParse(EmberAfClusterCommand *cmd)
     case ZCL_ON_OFF_CLUSTER_ID:
       result = emberAfOnOffClusterServerCommandParse(cmd);
       break;
+    case ZCL_ORVIBO_PRIVATE_CLUSTER_ID:
+      result = status(false, true, cmd->mfgSpecific);
+      break;
     default:
       // Unrecognized cluster ID, error status will apply.
       break;

@@ -1059,4 +1059,16 @@
 #define ZCL_TRUST_CENTER_FOR_CLUSTER_SERVER_QUERY_COMMAND_ID 0x1F // Ver.: always mfgCode: 0x1217
 
 
+// Command types for cluster: OrviboPrivate
+// Cluster specification level: zcl-7.0-07-5123-07
+
+// Server to client
+#define ZCL_RESET_DEVICE_RESPONSE_COMMAND_ID 0xFE // Ver.: always
+#define ZCL_ORB_RE_START_DEVICE_RESPONSE_COMMAND_ID 0xFF // Ver.: always
+
+// Client to server
+#define ZCL_RESET_DEVICE_COMMAND_ID 0xFE // Ver.: always
+#define ZCL_ORB_RE_START_DEVICE_COMMAND_ID 0xFF // Ver.: always
+
+
 #endif // SILABS_EMBER_AF_COMMAND_ID

@@ -39,16 +39,18 @@
 #define CREATOR_CUSTOM_INSTALLCODE                   0x0031     //自定InstallCode存放区
 #define CREATOR_CUSTOM_SERIAL_NUMBER                 0x0032     //自定系列号存放区
 #define CREATOR_CUSTOM_HFX_CTUNE                     0x0033     //自定高频外部晶振频偏调整参数
-#define CREATOR_CUSTOM_NODE_TYPE					 0x0034		//节点类型
-#define CREATOR_CUSTOM_SWITCH_TYPE					 0x0035		//开关类型
+#define CREATOR_CUSTOM_AUTH_CODE			     	 0x0034		//网关授权
+#define CREATOR_CUSTOM_NODE_TYPE					 0x0035		//节点类型
+#define CREATOR_CUSTOM_SWITCH_TYPE					 0x0036		//开关类型
 
 
 #define NVM3KEY_CUSTOM_AUTHORISATION_CODE            0x0030     //自定授权码存放区
 #define NVM3KEY_CUSTOM_INSTALLCODE                   0x0031     //自定InstallCode存放区
 #define NVM3KEY_CUSTOM_SERIAL_NUMBER                 0x0032     //自定系列号存放区
 #define NVM3KEY_CUSTOM_HFX_CTUNE                     0x0033     //自定高频外部晶振频偏调整参数
-#define NVM3KEY_CUSTOM_NODE_TYPE                     0x0034		//节点类型
-#define NVM3KEY_CUSTOM_SWITCH_TYPE                   0x0035		//开关类型
+#define NVM3KEY_CUSTOM_AUTH_CODE   					 0x0034     //网关授权
+#define NVM3KEY_CUSTOM_NODE_TYPE                     0x0035		//节点类型
+#define NVM3KEY_CUSTOM_SWITCH_TYPE                   0x0036		//开关类型
 
 // Types for the tokens
 #ifdef DEFINETYPES
@@ -64,6 +66,10 @@
   typedef struct {
     uint8_t sn[17];                //16Byte的SN号字串，+ 1个结束符
   } tTokenTypeSerialNumber;
+
+  typedef struct {
+	uint8_t code[25];                //24Byte的授权码，+ 1个结束符
+  } tTokenTypeCustomAuthCode;  
 #endif // DEFINETYPES
 
 // Actual token definitions
@@ -73,6 +79,7 @@
   DEFINE_BASIC_TOKEN(CUSTOM_INSTALLCODE,         tTokenTypeCustomInstallCode,   {0x00,})
   DEFINE_BASIC_TOKEN(CUSTOM_SERIAL_NUMBER,       tTokenTypeSerialNumber,        {0x00,})
   DEFINE_BASIC_TOKEN(CUSTOM_HFX_CTUNE,           uint16_t,                      0xFFFF)
+  DEFINE_BASIC_TOKEN(CUSTOM_AUTH_CODE,  		 tTokenTypeCustomAuthCode, {0x00,})
   DEFINE_BASIC_TOKEN(CUSTOM_NODE_TYPE, 			 uint8_t, 						0x04)
   DEFINE_BASIC_TOKEN(CUSTOM_SWITCH_TYPE, 		 uint8_t, 						0x00)
 #endif // DEFINETOKENS

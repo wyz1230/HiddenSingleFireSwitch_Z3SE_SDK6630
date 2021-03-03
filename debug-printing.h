@@ -2078,6 +2078,25 @@
 #endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_SL_WWAH_CLUSTER)
 
 
+// Printing macros for cluster: OrviboPrivate
+#if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER)
+#define emberAfOrviboPrivateClusterPrint(...) emberAfPrint(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER, __VA_ARGS__)
+#define emberAfOrviboPrivateClusterPrintln(...) emberAfPrintln(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER,  __VA_ARGS__)
+// Blocking IO is enabled for all serial ports, therefore flush calls are unnecessary.
+#define emberAfOrviboPrivateClusterFlush()
+#define emberAfOrviboPrivateClusterDebugExec(x) if ( emberAfPrintEnabled(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER) ) { x; }
+#define emberAfOrviboPrivateClusterPrintBuffer(buffer, len, withSpace) emberAfPrintBuffer(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER, (buffer), (len), (withSpace))
+#define emberAfOrviboPrivateClusterPrintString(buffer) emberAfPrintString(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER, (buffer))
+#else
+#define emberAfOrviboPrivateClusterPrint(...)
+#define emberAfOrviboPrivateClusterPrintln(...)
+#define emberAfOrviboPrivateClusterFlush()
+#define emberAfOrviboPrivateClusterDebugExec(x)
+#define emberAfOrviboPrivateClusterPrintBuffer(buffer, len, withSpace)
+#define emberAfOrviboPrivateClusterPrintString(buffer)
+#endif //defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_ORVIBO_PRIVATE_CLUSTER)
+
+
 // Printing macros for Core
 // Prints messages for global flow of the receive/send
 #if defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_CORE)
