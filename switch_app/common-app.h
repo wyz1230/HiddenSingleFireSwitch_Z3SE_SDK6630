@@ -99,6 +99,17 @@
 
 
 #define MAIN_POWER_RELAY_NUMBER   0 //jim add 202007116
+#define	ONOFF_TYPE			 0
+#define POWER_ON_STATUS_TYPE 1
+#define SWITCH_TYPE			 2
+
+#define POWERON_STATUS_ON			0x0
+#define POWERON_STATUS_OFF			0x01
+#define POWERON_STATUS_MEMORY		0x02
+#define POWERON_STATUS_FOLLOW		0x03
+
+#define RELAY_ON		1
+#define RELAY_OFF		0
 /* 自定义类型区 ---------------------------------------------------------------- */
 
 /* 全局函数声明区 -------------------------------------------------------------- */

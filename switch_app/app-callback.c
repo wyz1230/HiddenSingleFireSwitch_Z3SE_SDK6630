@@ -32,11 +32,24 @@
 
 #define POWER_ON_NETWORK_UP_TRIGREJOIN_CODE     //20200428 jim add for test
 /* 自定义类型区 ---------------------------------------------------------------- */
+#define LIGHT_LIST_MAX_NUMBER                 5
 
+enum{
+    LIGHT_OFF =0x00,   
+	LIGHT_ON,
+	LIGHT_OVER 
+
+};
+
+typedef struct {
+    uint8_t  action;             //开关的行为
+    uint32_t time;               //动作的时间
+} tLightIndicateInterval;
 /* 全局变量区 ------------------------------------------------------------------ */
 EmberEventControl appPowerOnDelayInitEventControl;	        //上电延时初始化事件
 EmberEventControl appPowerOnOperationControl;				//上电延时5s再去操作继电器
 static uint8_t poweron_flg =false;									//上电标志位
+EmberEventControl loadLightIndicateControl;					//加网灯的指示
 
 //void appPowerOnDelayInitEventHandler(void);               //需要在代码中添加appPowerOnDelayInitEventHandler事件处理
 
@@ -45,6 +58,12 @@ static uint8_t poweron_flg =false;									//上电标志位
 static uint8_t local_ways = SWITCH_3WAYS;
 static uint8_t unbind_report_enable[3] = {0,0,0};  //处理第一次入网，为欧瑞博网关时，主动上报的处理标志
 static uint8_t node_type = EMBER_SLEEPY_END_DEVICE; //4; //设备类型,默认为enddevice
+static uint8_t light_indicate_current_index = 0;
+const static tLightIndicateInterval light_indicate_interval_table[LIGHT_LIST_MAX_NUMBER] ={{LIGHT_OFF,    100},
+                                         {LIGHT_ON,     1900},
+										 {LIGHT_OFF,    100},
+										 {LIGHT_ON,     1900},
+										 {LIGHT_OVER,   0}};
 //jim add 20200717
 enum{
     NONE_TRIG = 0x00,
@@ -192,6 +211,130 @@ uint8_t getFlashSwitchType(void)
 	return type;
 }
 
+/**
+ //函数名：writeAttributeCallBack
+ //描述：写相关属性值
+ //参数：endpoint: 节点
+ // 	 type: 0为上电状态类型 1为开关类型
+ // 	 value: 待写入的onoff或亮度或色温值
+ //返回：void
+ */
+ void writeAttributeCallBack(uint8_t type, uint16_t value)
+ {
+ 	//EmberAfStatus status;
+ 	if(type ==POWER_ON_STATUS_TYPE)
+	{
+		assert(EMBER_ZCL_STATUS_SUCCESS
+			   == emberAfWriteAttribute(0x01,
+									   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+									   ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+									   CLUSTER_MASK_SERVER,
+									   (uint8_t *)(&value),
+									   ZCL_INT8U_ATTRIBUTE_TYPE));
+
+	}
+	else if(type ==SWITCH_TYPE)
+	{
+		assert(EMBER_ZCL_STATUS_SUCCESS
+			   == emberAfWriteAttribute(0x01,
+									   ZCL_BASIC_CLUSTER_ID,
+									   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
+									   CLUSTER_MASK_SERVER,
+									   (uint8_t *)(&value),
+									   ZCL_ENUM8_ATTRIBUTE_TYPE));
+	}	
+ }
+
+ /**
+ //函数名：readAttributeCallBack
+ //描述：获取相关属性值
+ // 	 上电初始化调用
+ //参数：type: 0为上电状态类型 1为开关类型
+ //返回：从存储区读出的存储值
+ */
+ uint8_t readAttributeCallBack(uint8_t type)
+ {
+	 uint8_t u8returnVal;
+	 
+	 if(type ==POWER_ON_STATUS_TYPE)
+	 {
+		 assert(EMBER_ZCL_STATUS_SUCCESS
+				 == emberAfReadServerAttribute(0x01,
+											   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+											   ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+											   (uint8_t *)(&u8returnVal),
+											   sizeof(u8returnVal)));
+
+	 }
+	 else if(type ==SWITCH_TYPE)
+	 {
+		 assert(EMBER_ZCL_STATUS_SUCCESS
+				 == emberAfReadServerAttribute(0x01,
+											   ZCL_BASIC_CLUSTER_ID,
+											   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
+											   (uint8_t *)(&u8returnVal),
+											   sizeof(u8returnVal)));
+
+	 }
+	 
+	 return u8returnVal;
+ }
+
+/**
+//函数名：writeStorageCallBack
+//描述：写相关存储值
+//参数：endpoint: 节点
+//      type: 0为上电状态类型 1为开关类型
+//		value: 待写入的上电状态或开关类型
+//返回：void
+*/
+void writeStorageCallBack(uint8_t type, uint8_t value)
+{
+	if(type ==POWER_ON_STATUS_TYPE)
+	{
+		halCommonSetToken(TOKEN_POWER_ON_STATUS_SINGLETON, (uint8_t *)(&value));
+	}
+	else if(type ==SWITCH_TYPE)
+	{
+		//halCommonSetToken(TOKEN_GENERIC_DEVICE_TYPE_SINGLETON, (uint8_t *)(&value));
+		halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
+	}	
+}
+
+/**
+//函数名：readStorageCallBack
+//描述：获取相关token值
+//		上电初始化调用
+//参数：type: 0为开关状态 1为上电状态类型 2为开关类型
+//返回：从存储区读出的存储值
+*/
+uint8_t readStorageCallBack(uint8_t type,uint8_t ep)
+{
+	uint8_t u8returnVal;
+	if(type ==ONOFF_TYPE)
+	{
+		if(ep ==1)
+		{
+			halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_ON_OFF_1);
+		}
+		else if(ep ==2)
+		{
+			halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_ON_OFF_2);
+		}
+
+	}	
+	else if(type ==POWER_ON_STATUS_TYPE)
+	{
+		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_POWER_ON_STATUS_SINGLETON);
+	}	
+	else if(type ==SWITCH_TYPE)
+	{
+		//halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_GENERIC_DEVICE_TYPE_SINGLETON);
+		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_CUSTOM_SWITCH_TYPE);
+	}		
+
+	return u8returnVal;
+}
 void appPowerOnOperationHandler(void)
 {
 	emberEventControlSetInactive(appPowerOnOperationControl);
@@ -213,6 +356,45 @@ bool onOffClusterSetValueCommandCallback(uint8_t endpoint, bool currentValue,
                                          uint8_t command,bool initiatedByLevelChange)
 {
 	return false;
+}
+
+/**
+//函数名：LightIndicateUpdate
+//描述：启动灯加网指示
+//参数：无
+//返回：void
+*/
+void LightIndicateUpdate(bool type)
+{
+	if(type)
+	{
+		emberEventControlSetActive(loadLightIndicateControl);
+	}
+	else
+	{
+		emberEventControlSetInactive(loadLightIndicateControl);
+	}
+	light_indicate_current_index =0;
+}
+
+/**
+//函数名：loadLightIndicateHandler
+//描述：灯执行处理handler
+//参数：无
+//返回：void
+*/
+void loadLightIndicateHandler(void)
+{
+   emberEventControlSetInactive(loadLightIndicateControl);
+   updateAndTrigeRelayControlBufferNextAction(0, light_indicate_interval_table[light_indicate_current_index].action, 0, true);
+   emberEventControlSetDelayMS(loadLightIndicateControl,light_indicate_interval_table[light_indicate_current_index].time);
+
+   light_indicate_current_index ++;
+   if(light_indicate_interval_table[light_indicate_current_index].action ==LIGHT_OVER)
+   {
+		emberEventControlSetInactive(loadLightIndicateControl);
+		 light_indicate_current_index =0;
+   }
 }
 
 /**
@@ -406,11 +588,13 @@ bool emberAfStackStatusCallback(EmberStatus status)
     #ifdef MODULE_CHANGE_NODETYPE
 	}
     #endif
+    emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_OFF_COMMAND_ID,false);
+    emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_OFF_COMMAND_ID,false);	
 	customAppDebugPrintln("wyz->EMBER_NETWORK_ON:%d\r\n",getDeviceType()); //wyz add
 	customAppDebugPrintln("wyz chn: %d\r\n",emberAfGetRadioChannel());
 	customAppDebugPrintln("wyz node ID: %2x\r\n",emberAfGetNodeId());
   }
-  else
+  else if(EMBER_NETWORK_DOWN == status)
   {
 	 customAppDebugPrintln("network down");
   }
@@ -869,7 +1053,7 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
 void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
                                                        EmberAfAttributeId attributeId)
 {
-	uint8_t nodetype =0;
+	uint8_t nodetype =0,switchType =0;
 	#ifdef MODULE_CHANGE_NODETYPE
 	if(attributeId ==ZCL_PHYSICAL_ENVIRONMENT_ATTRIBUTE_ID)
 	{
@@ -903,6 +1087,23 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
 
 	}
 	#endif
+	if(attributeId ==ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID)
+	{
+		if (emberAfReadServerAttribute(endpoint,
+									   ZCL_BASIC_CLUSTER_ID,
+									   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
+									   (uint8_t *)&switchType,
+									   sizeof(switchType))
+				== EMBER_ZCL_STATUS_SUCCESS)
+		{
+			setFlashSwitchType(switchType);
+			setSwitchType(switchType);			
+			customAppDebugPrintln("app set switch type:%d",switchType);
+			ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
+		}
+
+
+	}
 }
 /** @brief Wake Up
  *
@@ -1172,6 +1373,38 @@ static void switchOnDoneProc(uint8_t way)
        }
    }
    trig_type[way] = NONE_TRIG;
+}
+/** @brief OrviboPrivate Cluster Server Pre Attribute Changed
+ *
+ * Server Pre Attribute Changed
+ *
+ * @param endpoint Endpoint that is being initialized  Ver.: always
+ * @param attributeId Attribute to be changed  Ver.: always
+ * @param attributeType Attribute type  Ver.: always
+ * @param size Attribute size  Ver.: always
+ * @param value Attribute value  Ver.: always
+ */
+EmberAfStatus emberAfOrviboPrivateClusterServerPreAttributeChangedCallback(uint8_t endpoint,
+                                                                           EmberAfAttributeId attributeId,
+                                                                           EmberAfAttributeType attributeType,
+                                                                           uint8_t size,
+                                                                           uint8_t *value)
+{
+
+}
+
+/** @brief OrviboPrivate Cluster Server Attribute Changed
+*
+* Server Attribute Changed
+*
+* @param endpoint Endpoint that is being initialized  Ver.: always
+* @param attributeId Attribute that changed  Ver.: always
+*/
+void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
+															  EmberAfAttributeId attributeId)
+{
+
+
 }
 //end jim
 /*************************************** 文 件 结 束 ******************************************/

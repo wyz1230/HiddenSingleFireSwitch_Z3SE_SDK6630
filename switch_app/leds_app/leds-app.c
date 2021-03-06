@@ -227,7 +227,7 @@ void ledsAppChangeLedsStatus(uint8_t leds_status)
 
 	  case LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA:
 	  //开关状态变化时，对应的指示灯快闪一下，300ms
-	  ledsDriverLedsControl(leds_number_list[0], 0,60,120, 3);//闪一次，300ms
+	  ledsDriverLedsControl(leds_number_list[0], 0,60,120, 6);//闪一次，300ms
 	  leds_current_status_lock = 1;
 	  emberEventControlSetDelayMS(ledsAppTimerEventControl,1000);		  //闪一次
 	  break;

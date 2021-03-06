@@ -26,6 +26,7 @@
   extern EmberEventControl emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventControl; \
   extern EmberEventControl ledsAppTimerEventControl; \
   extern EmberEventControl ledsDriverLedTaskEventControl; \
+  extern EmberEventControl loadLightIndicateControl; \
   extern EmberEventControl networkActionPollingEventControl; \
   extern EmberEventControl relayControlTaskEventControl; \
   extern EmberEventControl scenesTransitionEventControl; \
@@ -43,6 +44,7 @@
   extern void emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler(void); \
   extern void ledsAppTimerEventHandler(void); \
   extern void ledsDriverLedTaskEventHandler(void); \
+  extern void loadLightIndicateHandler(void); \
   extern void networkActionPollingEventHandler(void); \
   extern void relayControlTaskEventHandler(void); \
   extern void scenesTransitionEventHandler(void); \
@@ -90,6 +92,7 @@
   { &emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventControl, emberAfPluginUpdateTcLinkKeyBeginTcLinkKeyUpdateEventHandler }, \
   { &ledsAppTimerEventControl, ledsAppTimerEventHandler }, \
   { &ledsDriverLedTaskEventControl, ledsDriverLedTaskEventHandler }, \
+  { &loadLightIndicateControl, loadLightIndicateHandler }, \
   { &networkActionPollingEventControl, networkActionPollingEventHandler }, \
   { &relayControlTaskEventControl, relayControlTaskEventHandler }, \
   { &scenesTransitionEventControl, scenesTransitionEventHandler }, \
@@ -115,6 +118,7 @@
   "Update TC Link Key Plugin BeginTcLinkKeyUpdate",  \
   "Leds app timer event control",  \
   "Leds driver led task event control",  \
+  "Event data",  \
   "Network action polling event control",  \
   "Relay control task event control",  \
   "Scenes transition event control",  \

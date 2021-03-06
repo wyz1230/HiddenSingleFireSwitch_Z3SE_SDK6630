@@ -91,6 +91,7 @@ appPowerOnDelayInitEventControl,appPowerOnDelayInitEventHandler
 delaySyncStatusControl,delaySyncStatusHandler
 appPowerOnOperationControl,appPowerOnOperationHandler
 app_IdentifyDeviceControl,app_IdentifyDeviceEventHandler
+loadLightIndicateControl,loadLightIndicateHandler
 }
 {setupId:halOptions
 }
@@ -264,6 +265,7 @@ beginAttrList:SAVED_TO_FLASH
   cl:0x0000, at:0x0011, di:server, mf:0x0000
   cl:0xFF00, at:0x0001, di:server, mf:0x0000
   cl:0xFF00, at:0xFF00, di:server, mf:0x0000
+  cl:0x0006, at:0x0000, di:server, mf:0x0000
 endAttrList:SAVED_TO_FLASH
 beginAttrList:REPORTABLE
   cl:0x0001, at:0x0020, di:server, mf:0x0000
@@ -765,6 +767,8 @@ callbacks:emberAfPluginIdentifyStopFeedbackCallback
 callbacks:emberAfOtaBootloadClusterImageNotifyCallback
 callbacks:emberAfReadAttributesResponseCallback
 callbacks:emberAfBasicClusterServerAttributeChangedCallback
+callbacks:emberAfOrviboPrivateClusterServerPreAttributeChangedCallback
+callbacks:emberAfOrviboPrivateClusterServerAttributeChangedCallback
 }
 {setupId:zclCustomizer
 }

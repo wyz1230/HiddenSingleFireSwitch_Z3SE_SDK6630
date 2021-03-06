@@ -548,8 +548,11 @@ static void buttonsFourShortLongPressedProcess(uint8_t num)
   if (num == 0)
   {
 	  buttonsAppDebugPrintln("Reset");
-	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
-	  ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
+	  //networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
+	  //ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
+	  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
+	  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);	  
+	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE_AND_JOIN);
   }
 }
 
@@ -694,28 +697,66 @@ void syncButtonAndSwitchStatus(void)
 {
 	uint8_t networkStatus =0;
 	networkStatus =emberAfNetworkState();
-
-    if(switch_type == SWITCH_TYPE_QIAOBAN)
-    {
-      for (uint8_t i=0; i<2;i++)
-      {
-        buttonsAppDebugPrintln("qiaoban,[%d],switch status:%d",i+1,buttons_counter[i+1].last_button_status);
-        if(0 == buttons_counter[i+1].last_button_status)
-        {
-           emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
-        }
-        else
-        {
-           emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_ON_COMMAND_ID,false);
-        }
-      }
-    }
-	else
+    static uint8_t powerOnStatus;
+	uint8_t onoff[2];
+	powerOnStatus =readStorageCallBack(POWER_ON_STATUS_TYPE);
+	onoff[0] =readStorageCallBack(ONOFF_TYPE,1);
+	onoff[1] =readStorageCallBack(ONOFF_TYPE,2);
+	//网外上电自动启动加网以及设备重置，APP删除 自动进入配网
+	if (networkStatus == EMBER_JOINED_NETWORK)
 	{
-		for (uint8_t i=0; i<2;i++)
-			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
+		if(powerOnStatus ==POWERON_STATUS_OFF)
+		{
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_OFF_COMMAND_ID,false);
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_OFF_COMMAND_ID,false);
+		}
+		else if(powerOnStatus ==POWERON_STATUS_ON)
+		{
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
+
+		}
+		else if(powerOnStatus ==POWERON_STATUS_MEMORY)
+		{
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),onoff[0],false);
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),onoff[0],false);
+		}
+		else if(powerOnStatus ==POWERON_STATUS_FOLLOW)
+		{
+			if(switch_type == SWITCH_TYPE_QIAOBAN)
+			{
+			  for (uint8_t i=0; i<2;i++)
+			  {
+				buttonsAppDebugPrintln("qiaoban,[%d],switch status:%d",i+1,buttons_counter[i+1].last_button_status);
+				if(0 == buttons_counter[i+1].last_button_status)
+				{
+				   emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
+				}
+				else
+				{
+				   emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_ON_COMMAND_ID,false);
+				}
+			  }
+			}
+			else
+			{
+				for (uint8_t i=0; i<2;i++)
+					emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(i),ZCL_OFF_COMMAND_ID,false);
+			}
+		}
+		switchAppNetworkUpTrigReport(0);
 	}
-	switchAppNetworkUpTrigReport(0);
+
+	if (networkStatus == EMBER_NO_NETWORK)	 //按下触发加网
+	{
+		//操作完继电器的回调启动加网
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
+		networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
+	} 
+
+
+  #if 0
   if (networkStatus == EMBER_NO_NETWORK)   //按下触发加网
   {
     if (buttons_counter[1].last_button_status)  //第一路上电5s后是打开的
@@ -727,5 +768,6 @@ void syncButtonAndSwitchStatus(void)
        }
     }
   }	
+  #endif
 }
 /*************************************** 文 件 结 束 ******************************************/
