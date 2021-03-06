@@ -32,6 +32,7 @@
 
 #define RSP_OK_STRING                      "OK\r\n"
 #define RSP_FAIL_STRING                    "Fail\r\n"
+#define RSP_FAIL2_STRING				   "Fail,Need erase chip\r\n"
 #define productionTestResponds(...)        CLI_printf("Rsp " __VA_ARGS__)//; CLI_printf("\r\n")
 
 //#define AWAYS_IN_TEST_MODE              //使设备一直处于产测模式。为了方便测试产测功能用，正常功能不打开。正常产品一定需要关闭
@@ -148,6 +149,7 @@ static uint8_t  received_packets_data_length = 0;     //所收数据包的数据
 static uint16_t dut_need_to_send_packets_number = 0;  //DUT所需发包数
 
 static uint8_t  authorization_state = UNAUTHORIZATION;              //授权状态，0为非授权，其它值已经授权
+writeAttriType_enum writeAttriType =WRITE_ATT_TYPE_NONE;
 
 // Add 1 for the length byte which is at the start of the buffer.
 ALIGNMENT(2)
@@ -210,6 +212,10 @@ static void tinyCLI_WriteSerialNumber(void);      //写入序列号
 static void tinyCLI_ReadSerialNumber(void);       //读取序列号
 static void tinyCLI_DeleteSerialNumber(void);     //删除序列号
 static void tinyCLI_FactoryReset(void);           //恢复出厂设置
+static void tinyCLI_InstallAuthCode(void);	  //安装授权码
+static void tinyCLI_GetAuthCode(void); //获取授权码
+static void tinyCLI_DeleteAuthCode(void); //删除授权码
+static void getAuthCodeFromToken(tTokenTypeCustomAuthCode *code);
 //MixSwitch部分的测试
 static void tinyCLI_GetWaysConfig(void);          //获取开关路数配置结果
 static void tinyCLI_RelayControl(void);           //继电器控制
@@ -294,9 +300,12 @@ const CLI_cmdTable_t CLI_cmdTable[] =
 
     ADD_CLI_ITEMS("Test-GetWaysConfig",        tinyCLI_GetWaysConfig,         NULL,   \
                   "null",                                "Get the ways config"),
-    ADD_CLI_ITEMS("Test-RelayControl",         tinyCLI_RelayControl,          "11",   \
-                  "RelayWay(u8)0-2; OnOff(u8) 0:Off 1:On", "Control the relay"),
-
+    ADD_CLI_ITEMS("Test-InstallAuthCode", tinyCLI_InstallAuthCode,  "b",    \
+                  "AuthorisationCode(24B)",              "Install gateway authorisation code"),
+    ADD_CLI_ITEMS("Test-GetAuthCode",     tinyCLI_GetAuthCode,      NULL,   \
+                  "null",                                "Get the gateway authorisation result"),
+    ADD_CLI_ITEMS("Test-DeleteAuthCode",  tinyCLI_DeleteAuthCode,   NULL,   \
+                  "null",                                "Delete the gateway authorisation code"),                  
 	TINY_CLI_END()
 };
 /* 函数原型 ----------------------------------------------------------------- */
@@ -356,6 +365,7 @@ static void deviceInfoPowerOnPrint(void)
 
   if (delay_flag) customeDelay(PRINT_DELAY_EACH_LINE_TIME_MS);
 
+#ifdef AUTH_DEVICE_ALG
 //打印是否受权，此功能当前还没完成。
   tTokenTypeCustomAuthorisation temp;
   getCustomAuthorisationCodeFromToken(&temp);
@@ -370,6 +380,20 @@ static void deviceInfoPowerOnPrint(void)
     //校验失败
     authorization_state = UNAUTHORIZATION;
   }
+#else
+    tTokenTypeCustomAuthCode s_temp_auth_code;
+    getAuthCodeFromToken(&s_temp_auth_code);
+    if(0x00 == s_temp_auth_code.code[0] && 0x00 == s_temp_auth_code.code[1] && 0x00 == s_temp_auth_code.code[2])
+    {
+        //授权码为空
+        authorization_state = UNAUTHORIZATION;
+    }
+    else
+    {
+        //有授权码写入记录
+        authorization_state = AUTHORIZATION;
+    }
+#endif
   CLI_printf("AUTH: %d\r\n",authorization_state == AUTHORIZATION ? 1:0);
 }
 
@@ -483,8 +507,9 @@ bool authorizationPass(void)
 {
 #ifdef PASS_AUTHORISATION_CHECK
   return true;
-#endif
+	#else
   return authorization_state == AUTHORIZATION ? true:false;
+	#endif
 }
 
 /**
@@ -875,6 +900,51 @@ static void getSerialNumberFromToken(tTokenTypeSerialNumber *sn)
     }
   }
 }
+/**
+//函数名：saveAuthCodeToToken
+//描述  ：保存序列号到token中
+//参数  ：*sn (tTokenTypeSerialNumber *[输入]，需要存入的SN数据指针)
+//返回  ：void
+*/
+void saveAuthCodeToToken(tTokenTypeCustomAuthCode *code)
+{
+  tTokenTypeCustomAuthCode temp;
+
+  for (uint8_t i=0; i<3; i++)   //多次比较提高可靠性
+  {
+    halCommonGetToken(&temp, TOKEN_CUSTOM_AUTH_CODE); //先获取token里的值  !!!这里会导致成功之后还会打印fail
+    if (memcmp(temp.code,&code->code[0],25) == 0)  //24+结束符'\0'
+    {
+      break; //数值一致
+    }
+    else
+    {
+       halCommonSetToken(TOKEN_CUSTOM_AUTH_CODE, code);  //更新值
+    }
+  }
+
+}
+
+/**
+//函数名：getAuthCodeFromToken
+//描述  ：从token中获取序列号
+//参数  ：*sn (tTokenTypeSerialNumber *[输出]，需要读取的序列号数据存放指针)
+//返回  ：void
+*/
+void getAuthCodeFromToken(tTokenTypeCustomAuthCode *code)
+{
+  tTokenTypeCustomAuthCode temp;
+  for (uint8_t i=0; i<3; i++)   //多次比较提高可靠性
+  {
+    halCommonGetToken(&temp, TOKEN_CUSTOM_AUTH_CODE); //先获取token里的值
+    halCommonGetToken(code, TOKEN_CUSTOM_AUTH_CODE);    //再次获取token里的值
+    if (memcmp(temp.code,code,25) == 0)   //24+结束符'\0'
+    {
+      break; //数值一致 退出
+    }
+  }
+}
+
 #ifdef USE_CUSTOM_INSTALLCODE_CODE
 /**
 //函数名：checkCustomInstallCodeAndChangeToKey
@@ -2331,6 +2401,216 @@ static void tinyCLI_RelayControl(void)
     }
     productionTestResponds(RSP_OK_STRING);
   }
+}
+
+/**
+ //函数名：isHaveValidCustomMac
+ //描述  ：读取芯片是否写过有效的自定义mac
+ //参数  ：void
+ //返回  ：bool; 
+ //      true:有写过有效的自定义mac
+ //		 false:没有写过MAC
+ */
+bool isHaveValidCustomMac(void)
+{
+    uint8_t s_eui64_token[8];
+    uint8_t s_eui64_token_invalid[8];
+
+    memset(s_eui64_token_invalid,0xFF,sizeof(s_eui64_token_invalid));
+    halInternalGetMfgTokenData(s_eui64_token, MFG_CUSTOM_EUI_64_LOCATION, 0x7FU, sizeof(s_eui64_token));
+
+    if(0 == memcmp(s_eui64_token,s_eui64_token_invalid,sizeof(s_eui64_token)))
+    {
+    	productionTestDebugPrintln("not write mac");
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+ /**
+ //函数名：customWriteMac
+ //描述  ：写入自定义的MAC到芯片
+ //参数  ：*p_custom_eui64 (需要存入的eui64数据指针)
+ //返回  ：void
+ */
+ bool customWriteMac(uint8_t *p_custom_eui64)
+ {
+     if(!p_custom_eui64){return false;}
+ 
+     if(true == isHaveValidCustomMac())
+     {
+         productionTestDebugPrintln("custom mac have been written!,erase custom eui64 to try\r\n");
+         return false;
+     }
+ 
+     // OK, we verified the customer OUI.  Let's program it here.
+     halInternalSetMfgTokenData(TOKEN_MFG_CUSTOM_EUI_64, (uint8_t *) p_custom_eui64, EUI64_SIZE);
+ 
+     return true;
+ }
+
+ // @brief 十六进制转字符 0x01->"01" 0xa1->"a1"
+// @param: hex 十六进制数值
+// @param: hexLen 十六进制数值长度
+// @param: out, 输出缓冲区
+// @return 无
+void hex2str(const uint8_t* hex, int hexLen, uint8_t* out)
+{
+    uint8_t tmp;
+    int i=0;
+    for(i=0; i<hexLen; i++)
+    {   
+        tmp = ((*hex) & 0xF0) >> 4;
+        if (tmp < 10)
+            tmp += '0';   
+        else
+            tmp += ('A' - 10);
+        
+        *(out++) = tmp;
+        tmp= (*(hex++))&0x0F;
+        if (tmp < 10)
+            tmp += '0';
+        else
+            tmp += ('A' - 10);
+        *(out++) = tmp;
+    }
+    out[hexLen*2] = 0;
+}
+
+/**
+//函数名：tinyCLI_InstallAuthCode
+//描  述：设备授权，通过串口响应结果
+//参  数：无
+//返  回：void
+*/
+static void tinyCLI_InstallAuthCode(void)
+{
+	//参数1：序列号字串 D120216007000001 长度固定16字节
+	//成功:Rsp OK
+	//失败:Rsp Fail
+	tTokenTypeCustomAuthCode temp;
+	uint8_t *p_auth_code;
+	uint8_t length;
+	static uint32_t current_time_ms = 0;
+	
+	p_auth_code = (uint8_t *)CLI_getArguments(1);
+	length = p_auth_code[0];
+
+	memset(&temp,0,sizeof(temp));
+
+	//CLI_printf("enter install authcode,length:%d\r\n",length);
+	//CLI_printHexValue(p_auth_code, p_auth_code[0], 0);
+
+	if(current_time_ms != 0 && (500 >= (halCommonGetInt32uMillisecondTick() - current_time_ms)))
+	{
+		return;
+	}
+	current_time_ms = halCommonGetInt32uMillisecondTick();
+
+	if (24 == length && p_auth_code[1] ==0x88)
+	{
+		EmberAfStatus result;
+		memcpy(&temp.code[0],p_auth_code+1,24);
+
+		//写了MAC地址到MAC区域
+		if(true == customWriteMac(&temp.code[0]))
+		{
+			uint8_t s_authcode_string[50];
+			memset(s_authcode_string,0,sizeof(s_authcode_string));
+			s_authcode_string[0] = 48;
+			hex2str(&temp.code[0],24,s_authcode_string+1);
+			authorization_state = AUTHORIZATION;
+			writeAttriType =WRITE_ATT_TYPE_UART;			
+			result = emberAfWriteAttribute(emberAfEndpointFromIndex(0),
+					 ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+					 ZCL_AUTH_CODE_ATTRIBUTE_ID,
+					 CLUSTER_MASK_SERVER,
+					 (uint8_t *)&s_authcode_string,
+					 ZCL_CHAR_STRING_ATTRIBUTE_TYPE);
+			if(result ==EMBER_ZCL_STATUS_SUCCESS)
+			{
+				//保存数据到token,如果自定义的mac地址写入不成功，则认为授权执行不成功，也不写token
+				saveAuthCodeToToken(&temp);
+				productionTestResponds(RSP_OK_STRING); 
+			}
+        	else
+        	{
+				productionTestResponds(RSP_FAIL2_STRING); //已经写过MAC区域但写属性失败，需要擦除flash
+			}
+			return;
+		}
+		else
+		{
+			productionTestResponds(RSP_FAIL_STRING);
+		}
+	}
+	else
+	{
+		productionTestResponds(RSP_FAIL_STRING);
+	}
+
+}
+
+
+/**
+//函数名：getWriteAttributeType
+//描  述：获取写属性的类型
+//参  数：无
+//返  回：uint8_t, 0x01 表示串口数据后更新属性值；其它值表示其它方式更新属性值
+*/
+uint8_t getWriteAttributeType(void)
+{
+    return writeAttriType;
+}
+
+/**
+//函数名：setWriteAttributeType
+//描  述：更新写属性的类型
+//参  数：type [in] uint8_t 写属性类型
+//返  回：none
+*/
+void setWriteAttributeType(uint8_t type)
+{
+    writeAttriType = type;
+}
+
+/**
+//函数名：tinyCLI_GetAuthCode
+//描  述：获取授权码，通过串口响应结果
+//参  数：无
+//返  回：void
+*/
+static void tinyCLI_GetAuthCode(void)
+{
+    tTokenTypeCustomAuthCode temp;
+
+    getAuthCodeFromToken(&temp);
+
+    productionTestResponds("");
+    CLI_printHexValue((char *)temp.code, 24, 0);
+    CLI_printf("\r\n");
+}
+
+/**
+//函数名：tinyCLI_DeleteAuthCode
+//描  述：删除授权，通过串口响应结果
+//参  数：无
+//返  回：void
+*/
+static void tinyCLI_DeleteAuthCode(void)
+{
+#if 0
+    tTokenTypeCustomAuthCode temp;
+    memset(&temp.code[0],0x00,24);
+    saveAuthCodeToToken(&temp);
+    authorization_state = UNAUTHORIZATION;
+#endif
+
+    //由于mac地址只能写入一次，所有删除动作是无法执行的，故这里固定返回失败
+    productionTestResponds(RSP_FAIL_STRING);  
 }
 
 #endif //end ORB_PRODUCTION_TEST_CODE

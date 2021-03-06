@@ -752,6 +752,7 @@ void syncButtonAndSwitchStatus(void)
 		//操作完继电器的回调启动加网
 		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
 		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
+		LightIndicateUpdate(true);
 		networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
 	} 
 

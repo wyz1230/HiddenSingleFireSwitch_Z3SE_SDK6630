@@ -40,6 +40,11 @@ typedef struct
 	char *funcDesc;			//函数简介
 }CLI_cmdTable_t;
 
+typedef enum{
+   WRITE_ATT_TYPE_NONE = 0x00,  
+   WRITE_ATT_TYPE_UART,         //串口写的属性值
+   WRITE_ATT_TYPE_GATEWAY		//网关写的属性值
+} writeAttriType_enum;
 /* 外部变量声明区 ----------------------------------------------------------- */
 
 extern const CLI_cmdTable_t CLI_cmdTable[];

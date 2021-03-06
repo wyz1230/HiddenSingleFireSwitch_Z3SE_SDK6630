@@ -386,7 +386,7 @@ void LightIndicateUpdate(bool type)
 void loadLightIndicateHandler(void)
 {
    emberEventControlSetInactive(loadLightIndicateControl);
-   updateAndTrigeRelayControlBufferNextAction(0, light_indicate_interval_table[light_indicate_current_index].action, 0, true);
+   updateAndTrigeRelayControlBufferNextAction(1, light_indicate_interval_table[light_indicate_current_index].action, 0, true);
    emberEventControlSetDelayMS(loadLightIndicateControl,light_indicate_interval_table[light_indicate_current_index].time);
 
    light_indicate_current_index ++;
@@ -1374,6 +1374,39 @@ static void switchOnDoneProc(uint8_t way)
    }
    trig_type[way] = NONE_TRIG;
 }
+
+/**
+//函数名：str2hex
+//描  述：字符转十六进制, "a1ab"->0xa1ab
+//参  数：str   (uint8_t * [输入]), strlen(int32_t [输入])
+//       out(uint8_t * [输出])
+//返  回：成功返回0，失败返回-1
+*/
+int32_t str2hex(const uint8_t* str, int32_t strLen, uint8_t* out)
+{
+	uint8_t tmp;
+	uint32_t i;
+
+	for (i=0; i<strLen; ++i)
+	{
+		 if (*str >= '0' && *str <= '9')
+				 tmp = *str - '0';
+		 else if (*str >= 'a' && *str <= 'f')
+				 tmp = *str - 'a' + 10;
+		 else if (*str >= 'A' && *str <= 'F')
+				 tmp = *str - 'A' + 10;
+		 else
+				 return -1;
+		 
+		 if (i & 0x01)
+			 out[i >> 1] = out[i >> 1] | (tmp & 0x0F);
+		 else
+			 out[i >> 1] = (tmp << 4) & 0xF0;
+		 str++;
+	}
+	return 0;
+}
+
 /** @brief OrviboPrivate Cluster Server Pre Attribute Changed
  *
  * Server Pre Attribute Changed
@@ -1390,8 +1423,41 @@ EmberAfStatus emberAfOrviboPrivateClusterServerPreAttributeChangedCallback(uint8
                                                                            uint8_t size,
                                                                            uint8_t *value)
 {
-
+	static uint8_t powerUpFlg =true;
+	
+	//mainDebugPrintln("==pre1:0x%x",attributeId);
+	if (attributeId == ZCL_AUTH_CODE_ATTRIBUTE_ID)
+	{
+		//mainDebugPrintln("==pre2");
+		if(endpoint == emberAfEndpointFromIndex(0))
+		{
+			/*
+			1 第一次上电需要跑一下change函数，用于同步token
+			2 串口写MAC，会写属性,只判断前2个条件会导致写属性失败
+			*/
+			//串口写MAC，保证能进入change函数，写到属性里
+			//写过MAC，上电要保证到change函数
+			//网关再次写，要保证回复网关是只读
+			if(true == isHaveValidCustomMac() && false ==powerUpFlg && getWriteAttributeType() !=WRITE_ATT_TYPE_UART)
+			{
+				customAppDebugPrintln("return EMBER_ZCL_STATUS_READ_ONLY");
+				return EMBER_ZCL_STATUS_READ_ONLY;
+			}
+			else
+			{
+				//如果上电要加一个保护机制，判断token里有值，但读出来的属性是空的，可以将下面这个放到下个条件做测试
+				powerUpFlg =false;	//此位置清除保证上电会change回调一下auth同步			
+				customAppDebugPrintln("return ok");
+				return EMBER_ZCL_STATUS_SUCCESS;
+			}
+		}
+	}
+	else
+	{
+		return EMBER_ZCL_STATUS_SUCCESS;		
+	}
 }
+
 
 /** @brief OrviboPrivate Cluster Server Attribute Changed
 *
@@ -1403,7 +1469,61 @@ EmberAfStatus emberAfOrviboPrivateClusterServerPreAttributeChangedCallback(uint8
 void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 															  EmberAfAttributeId attributeId)
 {
+   static bool startUpFlg =false;
+   uint8_t tmpStatus;
+   uint8_t dataTemp[50];
+   uint8_t dateArray[24];
+   tTokenTypeCustomAuthCode s_customAuthCodeTemp;
 
+   if (attributeId == ZCL_AUTH_CODE_ATTRIBUTE_ID)
+	   {
+		   if(endpoint == emberAfEndpointFromIndex(0))
+		   {
+			   memset(dataTemp,0,sizeof(dataTemp));
+			   /*
+			   第一次没有授权，会跑一次change函数。
+			   已授权，只会跑pre change函数		   
+			   */
+			   if (emberAfReadAttribute(endpoint,
+								   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+								   ZCL_AUTH_CODE_ATTRIBUTE_ID,
+								   CLUSTER_MASK_SERVER,
+								   dataTemp,
+								   49,	//长度48+ 1byte长度
+								   NULL) == EMBER_ZCL_STATUS_SUCCESS)	   
+			   {
+				   customAppDebugPrintln("==1");
+				   if(false == startUpFlg)
+				   {
+					   startUpFlg = true;
+					   //写过MAC上电，会跑这
+					   customAppDebugPrintln("++++++auth code power up");
+					   return;
+				   }
+				   
+				   customAppDebugPrintln("+++app set the Auth code");
+				   
+				   str2hex(dataTemp+1,48,dateArray);
+				   
+				   memcpy(s_customAuthCodeTemp.code,dateArray,24);
+				   s_customAuthCodeTemp.code[24] = 0;
+   
+				   //串口写MAC会写属性，这里会判断依据写过MAC
+				   if(true == customWriteMac(&s_customAuthCodeTemp.code[0]))
+				   {
+					   //保存数据到token,如果自定义的mac地址写入不成功，则认为授权执行不成功，也不写token
+					   saveAuthCodeToToken(&s_customAuthCodeTemp);
+					   customAppDebugPrintln("app set the Auth code success");
+				   }				
+			   }
+   
+			   reportingPluginTrigReport(emberAfEndpointFromIndex(0),
+						  ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+						  ZCL_AUTH_CODE_ATTRIBUTE_ID,
+						  0,
+						  200); //200毫秒随机窗口上报										  
+		   }
+	   }
 
 }
 //end jim
