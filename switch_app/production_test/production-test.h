@@ -75,6 +75,48 @@ uint8_t inProductionTestMode(void);
 bool authorizationPass(void);
 
 /**
+//函数名：getAuthCodeFromToken
+//描述  ：从token中获取序列号
+//参数  ：*sn (tTokenTypeSerialNumber *[输出]，需要读取的序列号数据存放指针)
+//返回  ：void
+*/
+void getAuthCodeFromToken(tTokenTypeCustomAuthCode *code);
+
+/**
+//函数名：saveAuthCodeToToken
+//描述  ：保存序列号到token中
+//参数  ：*sn (tTokenTypeSerialNumber *[输入]，需要存入的SN数据指针)
+//返回  ：void
+*/
+void saveAuthCodeToToken(tTokenTypeCustomAuthCode *code);
+
+/**
+//函数名：customWriteMac
+//描  述：尝试写入个人的eui64
+//参  数：无
+//返  回：bool,true,写入成功，false，无法写入
+*/
+bool customWriteMac(uint8_t *p_custom_eui64);
+
+/**
+ //函数名：isHaveValidCustomMac
+ //描述  ：读取芯片是否写过有效的自定义mac
+ //参数  ：void
+ //返回  ：bool; 
+ //      true:有写过有效的自定义mac
+ //		 false:没有写过MAC
+ */
+bool isHaveValidCustomMac(void);
+
+/**
+//函数名：getWriteAttributeType
+//描  述：获取写属性的类型
+//参  数：无
+//返  回：uint8_t, 0x01 表示串口数据后更新属性值；其它值表示其它方式更新属性值
+*/
+uint8_t getWriteAttributeType(void);
+
+/**
 //函数名：_putchar
 //描述：调用tiny print的输出入口函数，转换为efr32平台的串口输出
 //参数：character (char [输入]，需要打印的字符)
