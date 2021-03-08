@@ -131,6 +131,7 @@ bool checkAtrributeNeedToResetDefaultCallback(uint8_t endpoint,
          return false;  //model id不需要恢复出厂默认值
        }
      }
+	 
      if ((ZCL_ON_OFF_CLUSTER_ID == clusterId) &&
          (ZCL_ON_OFF_ATTRIBUTE_ID == attributeId) &&
          (CLUSTER_MASK_SERVER == mask))
@@ -138,6 +139,15 @@ bool checkAtrributeNeedToResetDefaultCallback(uint8_t endpoint,
        networkStatusProcDebugPrintln(" Unreset ep=%d,cluID=%ld,attID=%ld",endpoint,clusterId,attributeId);
        return false;  //on off开关状态不需要恢复出厂默认值
      }
+		 
+	 if((ZCL_ORVIBO_PRIVATE_CLUSTER_ID == clusterId) && (CLUSTER_MASK_SERVER == mask))
+	 {
+		if ((ZCL_AUTH_CODE_ATTRIBUTE_ID == attributeId) || (ZCL_POWER_ON_STATUS_ATTRIBUTE_ID ==attributeId))
+		{
+			networkStatusProcDebugPrintln(" Unreset ep=%d,cluID=%ld,attID=%ld",endpoint,clusterId,attributeId);
+			return false;  //AUTH不需要恢复出厂默认值
+		}
+	 }		 
   }
   return true;
 }

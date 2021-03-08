@@ -28,6 +28,7 @@
   extern EmberEventControl ledsDriverLedTaskEventControl; \
   extern EmberEventControl loadLightIndicateControl; \
   extern EmberEventControl networkActionPollingEventControl; \
+  extern EmberEventControl onOffResetControl; \
   extern EmberEventControl relayControlTaskEventControl; \
   extern EmberEventControl scenesTransitionEventControl; \
   extern void appPowerOnDelayInitEventHandler(void); \
@@ -46,6 +47,7 @@
   extern void ledsDriverLedTaskEventHandler(void); \
   extern void loadLightIndicateHandler(void); \
   extern void networkActionPollingEventHandler(void); \
+  extern void onOffResetHandler(void); \
   extern void relayControlTaskEventHandler(void); \
   extern void scenesTransitionEventHandler(void); \
   static void networkEventWrapper(EmberEventControl *control, EmberAfNetworkEventHandler handler, uint8_t networkIndex) \
@@ -94,6 +96,7 @@
   { &ledsDriverLedTaskEventControl, ledsDriverLedTaskEventHandler }, \
   { &loadLightIndicateControl, loadLightIndicateHandler }, \
   { &networkActionPollingEventControl, networkActionPollingEventHandler }, \
+  { &onOffResetControl, onOffResetHandler }, \
   { &relayControlTaskEventControl, relayControlTaskEventHandler }, \
   { &scenesTransitionEventControl, scenesTransitionEventHandler }, \
   { &emberAfPluginEndDeviceSupportMoveNetworkEventControls[0], emberAfPluginEndDeviceSupportMoveNetworkEventWrapper0 }, \
@@ -118,8 +121,9 @@
   "Update TC Link Key Plugin BeginTcLinkKeyUpdate",  \
   "Leds app timer event control",  \
   "Leds driver led task event control",  \
-  "Event data",  \
+  "Load light indicate control",  \
   "Network action polling event control",  \
+  "Event data",  \
   "Relay control task event control",  \
   "Scenes transition event control",  \
   "End Device Support Plugin Move NWK 0", \

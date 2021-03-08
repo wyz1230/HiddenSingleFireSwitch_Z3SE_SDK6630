@@ -64,6 +64,8 @@ const static tLightIndicateInterval light_indicate_interval_table[LIGHT_LIST_MAX
 										 {LIGHT_OFF,    100},
 										 {LIGHT_ON,     1900},
 										 {LIGHT_OVER,   0}};
+static uint8_t lightIndicateFlg =false; //灯指示标志位
+
 //jim add 20200717
 enum{
     NONE_TRIG = 0x00,
@@ -296,8 +298,8 @@ void writeStorageCallBack(uint8_t type, uint8_t value)
 	}
 	else if(type ==SWITCH_TYPE)
 	{
-		//halCommonSetToken(TOKEN_GENERIC_DEVICE_TYPE_SINGLETON, (uint8_t *)(&value));
-		halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
+		halCommonSetToken(TOKEN_GENERIC_DEVICE_TYPE_SINGLETON, (uint8_t *)(&value));
+		//halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
 	}	
 }
 
@@ -329,12 +331,13 @@ uint8_t readStorageCallBack(uint8_t type,uint8_t ep)
 	}	
 	else if(type ==SWITCH_TYPE)
 	{
-		//halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_GENERIC_DEVICE_TYPE_SINGLETON);
-		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_CUSTOM_SWITCH_TYPE);
+		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_GENERIC_DEVICE_TYPE_SINGLETON);
+		//halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_CUSTOM_SWITCH_TYPE);
 	}		
 
 	return u8returnVal;
 }
+
 void appPowerOnOperationHandler(void)
 {
 	emberEventControlSetInactive(appPowerOnOperationControl);
@@ -369,12 +372,15 @@ void LightIndicateUpdate(bool type)
 	if(type)
 	{
 		emberEventControlSetActive(loadLightIndicateControl);
+		lightIndicateFlg =true;
 	}
 	else
 	{
 		emberEventControlSetInactive(loadLightIndicateControl);
+		lightIndicateFlg =false;
 	}
 	light_indicate_current_index =0;
+	customAppDebugPrintln("LightIndicateUpdate:%d",type);
 }
 
 /**
@@ -386,14 +392,19 @@ void LightIndicateUpdate(bool type)
 void loadLightIndicateHandler(void)
 {
    emberEventControlSetInactive(loadLightIndicateControl);
-   updateAndTrigeRelayControlBufferNextAction(1, light_indicate_interval_table[light_indicate_current_index].action, 0, true);
+   updateAndTrigeRelayControlBufferNextAction(0, light_indicate_interval_table[light_indicate_current_index].action, 0, true);
    emberEventControlSetDelayMS(loadLightIndicateControl,light_indicate_interval_table[light_indicate_current_index].time);
+   customAppDebugPrintln("index:%d,action:%d,time:%d",light_indicate_current_index,light_indicate_interval_table[light_indicate_current_index].action,\
 
+   					light_indicate_interval_table[light_indicate_current_index].time);
+   
    light_indicate_current_index ++;
    if(light_indicate_interval_table[light_indicate_current_index].action ==LIGHT_OVER)
    {
+   	    customAppDebugPrintln("indicate over");
 		emberEventControlSetInactive(loadLightIndicateControl);
-		 light_indicate_current_index =0;
+		lightIndicateFlg =false;
+		light_indicate_current_index =0;
    }
 }
 
@@ -462,6 +473,21 @@ void appPowerOnDelayInitEventHandler(void)
   setSwitchType(tempType);
   customAppDebugPrintln(">>app init,switch type:%d,%d",getFlashSwitchType(),readDeviceTypeAttribute());
 }
+
+/**
+//函数名：resetAddNetProcess
+//描述：启动复位加网
+//参数：无
+//返回：void
+*/
+void resetAddNetProcess(void)
+{
+	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
+	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
+	LightIndicateUpdate(true);
+	networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);	
+}
+
 /** @brief Main Init
  *
  * This function is called from the application's main function. It gives the
@@ -596,6 +622,11 @@ bool emberAfStackStatusCallback(EmberStatus status)
   }
   else if(EMBER_NETWORK_DOWN == status)
   {
+  	 if(emberAfNetworkState() == EMBER_NO_NETWORK)
+  	 {
+		resetAddNetProcess();
+		customAppDebugPrintln("resetAddNetProcess");
+	 }
 	 customAppDebugPrintln("network down");
   }
   return false;
@@ -1054,14 +1085,17 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
                                                        EmberAfAttributeId attributeId)
 {
 	uint8_t nodetype =0,switchType =0;
+	static bool startUpFlg =false,startUpFlg1 =false;
 	#ifdef MODULE_CHANGE_NODETYPE
 	if(attributeId ==ZCL_PHYSICAL_ENVIRONMENT_ATTRIBUTE_ID)
 	{
-		if(poweron_flg)
+		if(false == startUpFlg)
 		{
-			//poweron_flg = false; //刚上电不会跑下面重启
+			startUpFlg = true;
+			customAppDebugPrintln("++++++powerOn power up nodeType status");
 			return;
-		}
+		}	
+
 		if (emberAfReadServerAttribute(endpoint,
 									   ZCL_BASIC_CLUSTER_ID,
 									   ZCL_PHYSICAL_ENVIRONMENT_ATTRIBUTE_ID,
@@ -1089,6 +1123,13 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
 	#endif
 	if(attributeId ==ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID)
 	{
+		if(false == startUpFlg1)
+		{
+			startUpFlg1 = true;
+			customAppDebugPrintln("++++++powerOn power up switchType status");
+			return;
+		}
+		
 		if (emberAfReadServerAttribute(endpoint,
 									   ZCL_BASIC_CLUSTER_ID,
 									   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
@@ -1101,8 +1142,6 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
 			customAppDebugPrintln("app set switch type:%d",switchType);
 			ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
 		}
-
-
 	}
 }
 /** @brief Wake Up
@@ -1341,6 +1380,8 @@ static bool switchOffPreProc(uint8_t way)
 		ledsAppChangeLedsStatus(LEDS_STATUS_STOP);
         //emberAfPluginNetworkSteeringStop();
         networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE_AND_STOP);
+		LightIndicateUpdate(false);
+		customAppDebugPrintln("switchOffPreProc");
         trig_type[way] = NONE_TRIG;
         return true; //关继电器需要延时
      }
@@ -1369,6 +1410,7 @@ static void switchOnDoneProc(uint8_t way)
           {
               //延时触发加网
               networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
+			  customAppDebugPrintln("switchOnDoneProc");
           }
        }
    }
@@ -1469,13 +1511,43 @@ EmberAfStatus emberAfOrviboPrivateClusterServerPreAttributeChangedCallback(uint8
 void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 															  EmberAfAttributeId attributeId)
 {
-   static bool startUpFlg =false;
+   static bool startUpFlg =false,startUpFlg1 =false;
    uint8_t tmpStatus;
    uint8_t dataTemp[50];
    uint8_t dateArray[24];
    tTokenTypeCustomAuthCode s_customAuthCodeTemp;
 
-   if (attributeId == ZCL_AUTH_CODE_ATTRIBUTE_ID)
+   if (attributeId == ZCL_POWER_ON_STATUS_ATTRIBUTE_ID)
+   {
+	   if(endpoint == emberAfEndpointFromIndex(0))
+	   {
+		  reportingPluginTrigReport(emberAfEndpointFromIndex(0),
+						  ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+						  ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+						  0,
+						  200); //200毫秒随机窗口上报		   
+						  
+		   if(false == startUpFlg1)
+		   {
+			   startUpFlg1 = true;
+			   customAppDebugPrintln("++++++powerOn power up status");
+			   return;
+		   }   
+		   
+		   if (emberAfReadServerAttribute(endpoint,
+										  ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+										  ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+										  (uint8_t *)&tmpStatus,
+										  sizeof(tmpStatus)) == EMBER_ZCL_STATUS_SUCCESS)	   
+		   {
+		   
+			   writeStorageCallBack(POWER_ON_STATUS_TYPE, tmpStatus);
+			   customAppDebugPrintln("+++app set power on status:%d",tmpStatus);
+
+		   }							  
+	   }
+   }
+   else if (attributeId == ZCL_AUTH_CODE_ATTRIBUTE_ID)
 	   {
 		   if(endpoint == emberAfEndpointFromIndex(0))
 		   {

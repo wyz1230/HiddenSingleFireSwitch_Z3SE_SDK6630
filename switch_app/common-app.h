@@ -160,5 +160,14 @@ bool getPowerOnStartingFlag(void);
 //返  回：void
 */
 void setButtonTrigType(uint8_t way);
+
+/**
+//函数名：resetAddNetProcess
+//描述：启动复位加网
+//参数：无
+//返回：void
+*/
+void resetAddNetProcess(void);
+
 #endif
 /*************************************** 文 件 结 束 ******************************************/

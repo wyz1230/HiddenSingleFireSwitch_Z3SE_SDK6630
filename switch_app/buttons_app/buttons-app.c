@@ -48,12 +48,16 @@ EmberEventControl buttonsAppTimerEventControl;   //两次按键之间的超时�
 //void buttonsAppTimerEventHandler(void);
 EmberEventControl app_RestartEventControl;
 EmberEventControl delaySyncStatusControl;
+EmberEventControl onOffResetControl;
+uint8_t onoffResetCnt =0;			//开关复位次数
 
 /* 本地变量区 ------------------------------------------------------------------ */
 static tButtonPressedCount buttons_counter[BUTTON_MAX_NUMBER];
 static uint16_t next_delay_time_ms = 0xFFFF;
 //static uint8_t buttons_number_list[BUTTON_MAX_NUMBER] = {0,1,2};   //用来记录前1,2,3路开关对应按键的对应位置.
 //static uint8_t powerOnRockerStatus;	//上电时候翘板开关状态
+static uint8_t onOffResetFlg =0;
+
 
 //只允许网外切换开关类型，切换指示为60ms的间隔快闪三次
 //踢网快闪切换仍然保持快闪
@@ -87,6 +91,41 @@ static void buttonLowCallbackProcess(uint8_t num);
 
 
 /* 函数原型 -------------------------------------------------------------------- */
+void startOnOffReset(void)
+{	
+	onoffResetCnt ++;
+
+	if(!onOffResetFlg)
+	{
+		//启动10s超时定时器
+		emberEventControlSetDelayMS(onOffResetControl,10000);
+		buttonsAppDebugPrintln("start reset timer");
+		onOffResetFlg =true;
+	}
+	
+	if(onoffResetCnt ==5)
+	{
+	  onoffResetCnt =0;
+	  emberEventControlSetInactive(onOffResetControl);
+	  buttonsAppDebugPrintln("onOff Reset");
+	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);	  
+	}	
+}
+
+/**
+//函数名：onOffResetHandler
+//描述：清除开关复位次数handler
+//参数：void
+//返回：void
+*/
+void onOffResetHandler(void)
+{
+	onoffResetCnt =0;
+	onOffResetFlg =0;
+	emberEventControlSetInactive(onOffResetControl);
+}
+
+
 /**
 //函数名：setSwitchType
 //描述：设置开关类型
@@ -417,6 +456,8 @@ static void buttonsPressedProcess(uint8_t num)
 		  buttonsAppDebugPrintln("set dianchu onoff:%d,%d",emberAfEndpointFromIndex(num-1),emberAfEndpointIsEnabled(emberAfEndpointFromIndex(num-1)));
           setButtonTrigType(num-1);
 		  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_TOGGLE_COMMAND_ID,false);
+		  startOnOffReset();
+
 	  }
 	  else
 	  {
@@ -547,12 +588,10 @@ static void buttonsFourShortLongPressedProcess(uint8_t num)
 {
   if (num == 0)
   {
-	  buttonsAppDebugPrintln("Reset");
-	  //networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
+	  buttonsAppDebugPrintln("button Reset");
+	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);
 	  //ledsAppChangeLedsStatus(LEDS_STATUS_NETWORK_LEAVED);
-	  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
-	  emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);	  
-	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE_AND_JOIN);
+
   }
 }
 
@@ -587,7 +626,7 @@ static void buttonHighCallbackProcess(uint8_t num)
   if(num ==0 || switch_type == SWITCH_TYPE_DIANCHU) return;
 
 	buttonsAppDebugPrintln("=====high:%d,%d",num,switch_type);
-
+    startOnOffReset();
     setButtonTrigType(num-1);
 	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_ON_COMMAND_ID,false);
 
@@ -609,7 +648,7 @@ static void buttonLowCallbackProcess(uint8_t num)
 	judgeButtonLock(num);
 
 	buttonsAppDebugPrintln("====low:%d,%d",num,switch_type);
-
+    startOnOffReset();
     setButtonTrigType(num-1);
 	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_OFF_COMMAND_ID,false);
     checkNetworkStateAndTrigeRejoin(); //jim add 20200717
@@ -750,10 +789,7 @@ void syncButtonAndSwitchStatus(void)
 	if (networkStatus == EMBER_NO_NETWORK)	 //按下触发加网
 	{
 		//操作完继电器的回调启动加网
-		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
-		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
-		LightIndicateUpdate(true);
-		networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
+        resetAddNetProcess();
 	} 
 
 

@@ -92,6 +92,7 @@ delaySyncStatusControl,delaySyncStatusHandler
 appPowerOnOperationControl,appPowerOnOperationHandler
 app_IdentifyDeviceControl,app_IdentifyDeviceEventHandler
 loadLightIndicateControl,loadLightIndicateHandler
+onOffResetControl,onOffResetHandler
 }
 {setupId:halOptions
 }
