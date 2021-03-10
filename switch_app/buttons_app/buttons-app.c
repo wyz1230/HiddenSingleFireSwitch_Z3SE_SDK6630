@@ -744,7 +744,9 @@ void syncButtonAndSwitchStatus(void)
 	onoff[0] =readStorageCallBack(ONOFF_TYPE,1);
 	onoff[1] =readStorageCallBack(ONOFF_TYPE,2);
 	//网外上电自动启动加网以及设备重置，APP删除 自动进入配网
-	if (networkStatus == EMBER_JOINED_NETWORK)
+	buttonsAppDebugPrintln("sync status network:0x%x",networkStatus);
+	
+	if (networkStatus == EMBER_JOINED_NETWORK || networkStatus == EMBER_JOINED_NETWORK_NO_PARENT)
 	{
 		buttonsAppDebugPrintln("powerOnStatus:%d,onoff1:%d,onoff2:%d",powerOnStatus,onoff[0],onoff[1]);
 		if(powerOnStatus ==POWERON_STATUS_OFF)

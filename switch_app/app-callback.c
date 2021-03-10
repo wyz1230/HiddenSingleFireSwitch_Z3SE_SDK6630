@@ -65,6 +65,7 @@ const static tLightIndicateInterval light_indicate_interval_table[LIGHT_LIST_MAX
 										 {LIGHT_ON,     1900},
 										 {LIGHT_OVER,   0}};
 static uint8_t lightIndicateFlg =false; //灯指示标志位
+static uint8_t addNetOKFlg =false;	//加网成功标志位
 
 //jim add 20200717
 enum{
@@ -485,7 +486,8 @@ void resetAddNetProcess(void)
 	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
 	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
 	LightIndicateUpdate(true);
-	networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);	
+	networkStatusTrigeNetworkAction(NETWORK_ACTION_DELAY_AND_START_JOIN);
+	addNetOKFlg =true;
 }
 
 /** @brief Main Init
@@ -614,8 +616,13 @@ bool emberAfStackStatusCallback(EmberStatus status)
     #ifdef MODULE_CHANGE_NODETYPE
 	}
     #endif
-    emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_OFF_COMMAND_ID,false);
-    emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_OFF_COMMAND_ID,false);	
+	//平时网内断电上电，不应该关闭继电器
+	//加网成功应该关闭继电器
+	if(addNetOKFlg)
+	{
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_OFF_COMMAND_ID,false);
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_OFF_COMMAND_ID,false);	
+	}
 	customAppDebugPrintln("wyz->EMBER_NETWORK_ON:%d\r\n",getDeviceType()); //wyz add
 	customAppDebugPrintln("wyz chn: %d\r\n",emberAfGetRadioChannel());
 	customAppDebugPrintln("wyz node ID: %2x\r\n",emberAfGetNodeId());
@@ -625,9 +632,10 @@ bool emberAfStackStatusCallback(EmberStatus status)
   	 if(emberAfNetworkState() == EMBER_NO_NETWORK)
   	 {
 		resetAddNetProcess();
+		addNetOKFlg =false;
 		customAppDebugPrintln("resetAddNetProcess");
 	 }
-	 customAppDebugPrintln("network down");
+	 customAppDebugPrintln("network down:0x%x",emberAfNetworkState());
   }
   return false;
 }
