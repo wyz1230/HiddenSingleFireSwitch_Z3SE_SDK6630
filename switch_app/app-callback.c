@@ -632,7 +632,6 @@ bool emberAfStackStatusCallback(EmberStatus status)
   	 if(emberAfNetworkState() == EMBER_NO_NETWORK)
   	 {
 		resetAddNetProcess();
-		addNetOKFlg =false;
 		customAppDebugPrintln("resetAddNetProcess");
 	 }
 	 customAppDebugPrintln("network down:0x%x",emberAfNetworkState());
