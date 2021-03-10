@@ -343,7 +343,7 @@ void appPowerOnOperationHandler(void)
 	emberEventControlSetInactive(appPowerOnOperationControl);
 	poweron_flg = false;
     syncButtonAndSwitchStatus();
-	customAppDebugPrintln("appPowerOnOperationHandler");
+	customAppDebugPrintln("appPowerOnOperationHandler 5s");
 }
 
 /**

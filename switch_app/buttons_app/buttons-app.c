@@ -94,7 +94,7 @@ static void buttonLowCallbackProcess(uint8_t num);
 void startOnOffReset(void)
 {	
 	onoffResetCnt ++;
-
+    buttonsAppDebugPrintln("startOnOffReset:%d,%d",onOffResetFlg, onoffResetCnt);
 	if(!onOffResetFlg)
 	{
 		//启动10s超时定时器
@@ -103,7 +103,7 @@ void startOnOffReset(void)
 		onOffResetFlg =true;
 	}
 	
-	if(onoffResetCnt ==5)
+	if(onoffResetCnt >=5)
 	{
 	  onoffResetCnt =0;
 	  emberEventControlSetInactive(onOffResetControl);
@@ -123,6 +123,7 @@ void onOffResetHandler(void)
 	onoffResetCnt =0;
 	onOffResetFlg =0;
 	emberEventControlSetInactive(onOffResetControl);
+	buttonsAppDebugPrintln("onoffReset timeout");
 }
 
 
@@ -135,6 +136,7 @@ void onOffResetHandler(void)
 void setSwitchType(uint8_t type)
 {
     switch_type =type;
+	onOffResetHandler();
 }
 
 /**
@@ -744,21 +746,26 @@ void syncButtonAndSwitchStatus(void)
 	//网外上电自动启动加网以及设备重置，APP删除 自动进入配网
 	if (networkStatus == EMBER_JOINED_NETWORK)
 	{
+		buttonsAppDebugPrintln("powerOnStatus:%d,onoff1:%d,onoff2:%d",powerOnStatus,onoff[0],onoff[1]);
 		if(powerOnStatus ==POWERON_STATUS_OFF)
 		{
 			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_OFF_COMMAND_ID,false);
 			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_OFF_COMMAND_ID,false);
+			buttonsAppDebugPrintln(">>power on off");
 		}
 		else if(powerOnStatus ==POWERON_STATUS_ON)
 		{
 			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),ZCL_ON_COMMAND_ID,false);
 			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),ZCL_ON_COMMAND_ID,false);
+			buttonsAppDebugPrintln(">>power on on");
 
 		}
 		else if(powerOnStatus ==POWERON_STATUS_MEMORY)
 		{
 			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(0),onoff[0],false);
-			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),onoff[0],false);
+			emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(1),onoff[1],false);
+			
+			buttonsAppDebugPrintln(">>power on memory");
 		}
 		else if(powerOnStatus ==POWERON_STATUS_FOLLOW)
 		{
