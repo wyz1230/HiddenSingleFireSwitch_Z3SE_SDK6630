@@ -64,10 +64,9 @@
     { 0x0001, ZCL_INT32U_ATTRIBUTE_TYPE, 4, (ATTRIBUTE_MASK_CLIENT|ATTRIBUTE_MASK_SINGLETON), { (uint8_t*)&(generatedDefaults[108]) } }, /* 24 / Over the Air Bootloading / Offset (address) into the file*/\
     { 0x0006, ZCL_ENUM8_ATTRIBUTE_TYPE, 1, (ATTRIBUTE_MASK_CLIENT|ATTRIBUTE_MASK_SINGLETON), { (uint8_t*)0x00 } }, /* 25 / Over the Air Bootloading / OTA Upgrade Status*/\
     { 0xFFFD, ZCL_INT16U_ATTRIBUTE_TYPE, 2, (ATTRIBUTE_MASK_CLIENT), { (uint8_t*)0x0001 } }, /* 26 / Over the Air Bootloading / cluster revision*/\
-    { 0x0001, ZCL_INT8U_ATTRIBUTE_TYPE, 1, (ATTRIBUTE_MASK_WRITABLE|ATTRIBUTE_MASK_TOKENIZE|ATTRIBUTE_MASK_SINGLETON), { (uint8_t*)0x01 } }, /* 27 / OrviboPrivate / power on status*/\
-    { 0x0004, ZCL_INT8U_ATTRIBUTE_TYPE, 1, (ATTRIBUTE_MASK_WRITABLE), { (uint8_t*)0x00 } }, /* 28 / OrviboPrivate / switch type*/\
-    { 0xFF00, ZCL_CHAR_STRING_ATTRIBUTE_TYPE, 50, (ATTRIBUTE_MASK_WRITABLE|ATTRIBUTE_MASK_TOKENIZE|ATTRIBUTE_MASK_SINGLETON), { NULL } }, /* 29 / OrviboPrivate / auth code*/\
-    { 0xFFFD, ZCL_INT16U_ATTRIBUTE_TYPE, 2, (0x00), { (uint8_t*)0x0001 } }, /* 30 / OrviboPrivate / cluster revision*/\
+    { 0x0004, ZCL_INT16U_ATTRIBUTE_TYPE, 2, (ATTRIBUTE_MASK_WRITABLE|ATTRIBUTE_MASK_TOKENIZE|ATTRIBUTE_MASK_SINGLETON), { (uint8_t*)0x0001 } }, /* 27 / OrviboPrivate / switch all set info*/\
+    { 0xFF00, ZCL_CHAR_STRING_ATTRIBUTE_TYPE, 50, (ATTRIBUTE_MASK_WRITABLE|ATTRIBUTE_MASK_TOKENIZE|ATTRIBUTE_MASK_SINGLETON), { NULL } }, /* 28 / OrviboPrivate / auth code*/\
+    { 0xFFFD, ZCL_INT16U_ATTRIBUTE_TYPE, 2, (0x00), { (uint8_t*)0x0001 } }, /* 29 / OrviboPrivate / cluster revision*/\
   }
 
 
@@ -91,7 +90,7 @@ const EmberAfGenericClusterFunction emberAfFuncArrayOrviboPrivateClusterServer[]
     { 0x0005, (EmberAfAttributeMetadata*)&(generatedAttributes[15]), 6, 8, (CLUSTER_MASK_SERVER| CLUSTER_MASK_INIT_FUNCTION), emberAfFuncArrayScenesClusterServer, },    \
     { 0x0006, (EmberAfAttributeMetadata*)&(generatedAttributes[21]), 2, 3, (CLUSTER_MASK_SERVER| CLUSTER_MASK_INIT_FUNCTION| CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION), emberAfFuncArrayOnOffClusterServer, },    \
     { 0x0019, (EmberAfAttributeMetadata*)&(generatedAttributes[23]), 4, 2, (CLUSTER_MASK_CLIENT| CLUSTER_MASK_INIT_FUNCTION| CLUSTER_MASK_DEFAULT_RESPONSE_FUNCTION), emberAfFuncArrayOtaBootloadClusterClient, },    \
-    { 0xFF00, (EmberAfAttributeMetadata*)&(generatedAttributes[27]), 4, 3, (CLUSTER_MASK_SERVER| CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION| CLUSTER_MASK_PRE_ATTRIBUTE_CHANGED_FUNCTION), emberAfFuncArrayOrviboPrivateClusterServer, },    \
+    { 0xFF00, (EmberAfAttributeMetadata*)&(generatedAttributes[27]), 3, 2, (CLUSTER_MASK_SERVER| CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION| CLUSTER_MASK_PRE_ATTRIBUTE_CHANGED_FUNCTION), emberAfFuncArrayOrviboPrivateClusterServer, },    \
     { 0x0000, (EmberAfAttributeMetadata*)&(generatedAttributes[1]), 10, 0, (CLUSTER_MASK_SERVER| CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION), emberAfFuncArrayBasicClusterServer, },    \
     { 0x0003, (EmberAfAttributeMetadata*)&(generatedAttributes[11]), 2, 4, (CLUSTER_MASK_SERVER| CLUSTER_MASK_INIT_FUNCTION| CLUSTER_MASK_ATTRIBUTE_CHANGED_FUNCTION), emberAfFuncArrayIdentifyClusterServer, },    \
     { 0x0004, (EmberAfAttributeMetadata*)&(generatedAttributes[13]), 2, 3, (CLUSTER_MASK_SERVER| CLUSTER_MASK_INIT_FUNCTION), emberAfFuncArrayGroupsClusterServer, },    \
@@ -102,7 +101,7 @@ const EmberAfGenericClusterFunction emberAfFuncArrayOrviboPrivateClusterServer[]
 
 // Endpoint types
 #define GENERATED_ENDPOINT_TYPES {        \
-    { (EmberAfCluster*)&(generatedClusters[0]), 8, 23 }, \
+    { (EmberAfCluster*)&(generatedClusters[0]), 8, 22 }, \
     { (EmberAfCluster*)&(generatedClusters[8]), 5, 18 }, \
   }
 
@@ -123,10 +122,10 @@ const EmberAfGenericClusterFunction emberAfFuncArrayOrviboPrivateClusterServer[]
 // Largest attribute size is needed for various buffers
 #define ATTRIBUTE_LARGEST (50)
 // Total size of singleton attributes
-#define ATTRIBUTE_SINGLETONS_SIZE (173)
+#define ATTRIBUTE_SINGLETONS_SIZE (174)
 
 // Total size of attribute storage
-#define ATTRIBUTE_MAX_SIZE 41
+#define ATTRIBUTE_MAX_SIZE 40
 
 // Array of endpoints that are supported
 #define FIXED_ENDPOINT_ARRAY { 1, 2 }

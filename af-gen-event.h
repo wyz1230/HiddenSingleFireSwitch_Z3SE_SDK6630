@@ -123,7 +123,7 @@
   "Leds driver led task event control",  \
   "Load light indicate control",  \
   "Network action polling event control",  \
-  "Event data",  \
+  "On off reset control",  \
   "Relay control task event control",  \
   "Scenes transition event control",  \
   "End Device Support Plugin Move NWK 0", \

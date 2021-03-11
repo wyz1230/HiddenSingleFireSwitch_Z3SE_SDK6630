@@ -31,6 +31,8 @@
 #define START_OTA_SHORT_POLLING_INTERVAL_MS               100     //设备开始ota的polling间隔
 
 #define POWER_ON_NETWORK_UP_TRIGREJOIN_CODE     //20200428 jim add for test
+
+
 /* 自定义类型区 ---------------------------------------------------------------- */
 #define LIGHT_LIST_MAX_NUMBER                 5
 
@@ -117,7 +119,7 @@ void switchAppNetworkUpTrigReport(uint8_t type);
 //static void batteryCapacityUpdateCallback(tBatteryWorkRecord *battery_record);
 static uint8_t readDeviceTypeAttribute(void);
 static void reportDeviceType(void);
-static void reportSwitchType(void);
+static void reportSwitchAllInfo(void);
 //jim add 20200717
 static bool switchOffPreProc(uint8_t way);
 static void switchOnDoneProc(uint8_t way);
@@ -190,31 +192,6 @@ uint8_t getFlashDeviceType(void)
 }
 
 /**
-//函数名：setFlashSwitchType
-//描述：设置开关类型，0为翘班，1为回弹
-//参数：无
-//返回：void
-*/
-void setFlashSwitchType(uint8_t type)
-{
-	halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
-}
-
-/**
-//函数名：getFlashSwitchType
-//描述：从flash获取开关是属于翘板还是回弹类型
-//参数：无
-//返回：void
-*/
-uint8_t getFlashSwitchType(void)
-{
-	uint8_t type;
-	halCommonGetToken(&type, TOKEN_CUSTOM_SWITCH_TYPE);
-	customAppDebugPrintln("switch type:%d",type);
-	return type;
-}
-
-/**
  //函数名：writeAttributeCallBack
  //描述：写相关属性值
  //参数：endpoint: 节点
@@ -225,27 +202,17 @@ uint8_t getFlashSwitchType(void)
  void writeAttributeCallBack(uint8_t type, uint16_t value)
  {
  	//EmberAfStatus status;
- 	if(type ==POWER_ON_STATUS_TYPE)
+ 	if(type ==SWITCH_ALL_SET_TYPE)
 	{
 		assert(EMBER_ZCL_STATUS_SUCCESS
 			   == emberAfWriteAttribute(0x01,
 									   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
-									   ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+									   ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
 									   CLUSTER_MASK_SERVER,
 									   (uint8_t *)(&value),
-									   ZCL_INT8U_ATTRIBUTE_TYPE));
+									   ZCL_INT16U_ATTRIBUTE_TYPE));
 
 	}
-	else if(type ==SWITCH_TYPE)
-	{
-		assert(EMBER_ZCL_STATUS_SUCCESS
-			   == emberAfWriteAttribute(0x01,
-									   ZCL_BASIC_CLUSTER_ID,
-									   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-									   CLUSTER_MASK_SERVER,
-									   (uint8_t *)(&value),
-									   ZCL_ENUM8_ATTRIBUTE_TYPE));
-	}	
  }
 
  /**
@@ -257,30 +224,21 @@ uint8_t getFlashSwitchType(void)
  */
  uint8_t readAttributeCallBack(uint8_t type)
  {
-	 uint8_t u8returnVal;
+	 uint16_t u16returnVal;
 	 
-	 if(type ==POWER_ON_STATUS_TYPE)
+	 if(type ==SWITCH_ALL_SET_TYPE)
 	 {
 		 assert(EMBER_ZCL_STATUS_SUCCESS
 				 == emberAfReadServerAttribute(0x01,
 											   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
-											   ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
-											   (uint8_t *)(&u8returnVal),
-											   sizeof(u8returnVal)));
+											   ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
+											   (uint8_t *)(&u16returnVal),
+											   sizeof(u16returnVal)));
 
 	 }
-	 else if(type ==SWITCH_TYPE)
-	 {
-		 assert(EMBER_ZCL_STATUS_SUCCESS
-				 == emberAfReadServerAttribute(0x01,
-											   ZCL_BASIC_CLUSTER_ID,
-											   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-											   (uint8_t *)(&u8returnVal),
-											   sizeof(u8returnVal)));
 
-	 }
 	 
-	 return u8returnVal;
+	 return u16returnVal;
  }
 
 /**
@@ -291,17 +249,12 @@ uint8_t getFlashSwitchType(void)
 //		value: 待写入的上电状态或开关类型
 //返回：void
 */
-void writeStorageCallBack(uint8_t type, uint8_t value)
+void writeStorageCallBack(uint8_t type, uint16_t value)
 {
-	if(type ==POWER_ON_STATUS_TYPE)
+	if(type ==SWITCH_ALL_SET_TYPE)
 	{
-		halCommonSetToken(TOKEN_POWER_ON_STATUS_SINGLETON, (uint8_t *)(&value));
+		halCommonSetToken(TOKEN_SWITCH_All_SET_INFO_SINGLETON, (uint8_t *)(&value));
 	}
-	else if(type ==SWITCH_TYPE)
-	{
-		halCommonSetToken(TOKEN_GENERIC_DEVICE_TYPE_SINGLETON, (uint8_t *)(&value));
-		//halCommonSetToken(TOKEN_CUSTOM_SWITCH_TYPE, (uint8_t *)&type);
-	}	
 }
 
 /**
@@ -311,32 +264,29 @@ void writeStorageCallBack(uint8_t type, uint8_t value)
 //参数：type: 0为开关状态 1为上电状态类型 2为开关类型
 //返回：从存储区读出的存储值
 */
-uint8_t readStorageCallBack(uint8_t type,uint8_t ep)
+uint16_t readStorageCallBack(uint8_t type,uint8_t ep)
 {
 	uint8_t u8returnVal;
+	uint16_t u16returnVal;
 	if(type ==ONOFF_TYPE)
 	{
 		if(ep ==1)
 		{
 			halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_ON_OFF_1);
+			
 		}
 		else if(ep ==2)
 		{
 			halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_ON_OFF_2);
 		}
-
+		u16returnVal =u8returnVal;
 	}	
-	else if(type ==POWER_ON_STATUS_TYPE)
+	else if(type ==SWITCH_ALL_SET_TYPE)
 	{
-		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_POWER_ON_STATUS_SINGLETON);
-	}	
-	else if(type ==SWITCH_TYPE)
-	{
-		halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_GENERIC_DEVICE_TYPE_SINGLETON);
-		//halCommonGetToken((uint8_t *)(&u8returnVal), TOKEN_CUSTOM_SWITCH_TYPE);
+		halCommonGetToken((uint16_t *)(&u16returnVal), TOKEN_SWITCH_All_SET_INFO_SINGLETON);
 	}		
 
-	return u8returnVal;
+	return u16returnVal;
 }
 
 void appPowerOnOperationHandler(void)
@@ -460,7 +410,7 @@ void appPowerOnInit(void)
 */
 void appPowerOnDelayInitEventHandler(void)
 {
-  uint8_t tempType =0;
+  uint16_t tempType =0;
   emberEventControlSetInactive(appPowerOnDelayInitEventControl);
 
   emberSetRadioPower(emberAfPluginNetworkSteeringGetPowerForRadioChannelCallback(emberGetRadioChannel()));
@@ -469,10 +419,9 @@ void appPowerOnDelayInitEventHandler(void)
   switchWaysConfigUpdateEndpointModelId();     //按开关路数更新endpoint的model id
   deviceInfoAppBasicAttributeInit();           //更新basic属性相关版本信息
   networkStatusProcessInit();                  //上电更新网络状态
-  readDeviceTypeAttribute();				   //读开关类型
-  tempType =getFlashSwitchType();
-  setSwitchType(tempType);
-  customAppDebugPrintln(">>app init,switch type:%d,%d",getFlashSwitchType(),readDeviceTypeAttribute());
+  tempType =readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
+  setSwitchType((tempType>>SWITCH_TYPE_BIT) & 0x01);
+  customAppDebugPrintln(">>app init,switch type:%d",tempType);
 }
 
 /**
@@ -815,7 +764,7 @@ void switchAppNetworkUpTrigReport(uint8_t type)
 		#ifdef MODULE_CHANGE_NODETYPE
 		reportDeviceType();
 		#endif
-		reportSwitchType();
+		reportSwitchAllInfo();
 	}
 	else
 	{
@@ -1091,8 +1040,8 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct* messageStruct,
 void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
                                                        EmberAfAttributeId attributeId)
 {
-	uint8_t nodetype =0,switchType =0;
-	static bool startUpFlg =false,startUpFlg1 =false;
+	//uint8_t nodetype =0,switchType =0;
+	//static bool startUpFlg =false,startUpFlg1 =false;
 	#ifdef MODULE_CHANGE_NODETYPE
 	if(attributeId ==ZCL_PHYSICAL_ENVIRONMENT_ATTRIBUTE_ID)
 	{
@@ -1128,28 +1077,6 @@ void emberAfBasicClusterServerAttributeChangedCallback(uint8_t endpoint,
 
 	}
 	#endif
-	if(attributeId ==ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID)
-	{
-		if(false == startUpFlg1)
-		{
-			startUpFlg1 = true;
-			customAppDebugPrintln("++++++powerOn power up switchType status");
-			return;
-		}
-		
-		if (emberAfReadServerAttribute(endpoint,
-									   ZCL_BASIC_CLUSTER_ID,
-									   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-									   (uint8_t *)&switchType,
-									   sizeof(switchType))
-				== EMBER_ZCL_STATUS_SUCCESS)
-		{
-			setFlashSwitchType(switchType);
-			setSwitchType(switchType);			
-			customAppDebugPrintln("app set switch type:%d",switchType);
-			ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
-		}
-	}
 }
 /** @brief Wake Up
  *
@@ -1316,17 +1243,18 @@ static void reportDeviceType(void)
 //参  数：无
 //返  回：void
 */
-static void reportSwitchType(void)
+static void reportSwitchAllInfo(void)
 {
-	uint8_t temp;
-    temp =getFlashSwitchType();
+	uint16_t temp;
+    temp =	readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
 	unicastReportAttribute(0x0000,0x01,
 						   emberAfEndpointFromIndex(0),
-						   ZCL_BASIC_CLUSTER_ID,
-						   ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-						   ZCL_ENUM8_ATTRIBUTE_TYPE,
+						   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+						   ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
+						   ZCL_INT16U_ATTRIBUTE_TYPE,
 						   (uint8_t *)&temp,
-						   1);
+						   2);
+	//reportingPluginTrigReport();
 	customAppDebugPrintln("poweron report qiaoban or huitan:%d",temp);	
 	#if 0
 	if(	emberAfReadAttribute(emberAfEndpointFromIndex(0),
@@ -1519,18 +1447,19 @@ void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 															  EmberAfAttributeId attributeId)
 {
    static bool startUpFlg =false,startUpFlg1 =false;
-   uint8_t tmpStatus;
+   uint16_t tmpStatus;
+   uint16_t readVal;
    uint8_t dataTemp[50];
    uint8_t dateArray[24];
    tTokenTypeCustomAuthCode s_customAuthCodeTemp;
 
-   if (attributeId == ZCL_POWER_ON_STATUS_ATTRIBUTE_ID)
+   if (attributeId == ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID)
    {
 	   if(endpoint == emberAfEndpointFromIndex(0))
 	   {
 		  reportingPluginTrigReport(emberAfEndpointFromIndex(0),
 						  ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
-						  ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+						  ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
 						  0,
 						  200); //200毫秒随机窗口上报		   
 						  
@@ -1543,13 +1472,19 @@ void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 		   
 		   if (emberAfReadServerAttribute(endpoint,
 										  ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
-										  ZCL_POWER_ON_STATUS_ATTRIBUTE_ID,
+										  ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
 										  (uint8_t *)&tmpStatus,
 										  sizeof(tmpStatus)) == EMBER_ZCL_STATUS_SUCCESS)	   
 		   {
-		   
-			   writeStorageCallBack(POWER_ON_STATUS_TYPE, tmpStatus);
-			   customAppDebugPrintln("+++app set power on status:%d",tmpStatus);
+			  uint8_t tmp;
+
+			  tmp =(tmpStatus>>SWITCH_TYPE_BIT) & 0x01;
+			  customAppDebugPrintln("+++app set SwitchType:%d",tmp);
+			  setSwitchType(tmp);
+
+			  tmp =(tmpStatus>>ROCKERSWITCH_ACTION_TYPE) & 0x01;
+			  setRockerSwitchActionType(tmp);
+			  customAppDebugPrintln("+++app set rockerSwitch action type:%d",tmp);
 
 		   }							  
 	   }

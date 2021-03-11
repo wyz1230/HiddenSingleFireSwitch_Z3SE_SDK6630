@@ -62,6 +62,9 @@
 #define SWITCH_TYPE_QIAOBAN			0//默认为翘板型
 #define SWITCH_TYPE_DIANCHU         1//点触型
 
+#define ROCKERSWITCH_FIXED_ACTION	0 //翘板开关固定方向开关
+#define ROCKERSWITCH_TOGGLE_ACTION	1 //翘板开关动作翻转
+
 #if(POWER_LINE_SUPPLY == LIVE_LINE_ONLY)
 #if 0
   #define SWITCH_1_GAND_MODELID_STRING   "93489b897f41465f89e11114cc8ed2d8"
@@ -100,8 +103,7 @@
 
 #define MAIN_POWER_RELAY_NUMBER   0 //jim add 202007116
 #define	ONOFF_TYPE			 0
-#define POWER_ON_STATUS_TYPE 1
-#define SWITCH_TYPE			 2
+#define SWITCH_ALL_SET_TYPE	 1
 
 #define POWERON_STATUS_ON			0x0
 #define POWERON_STATUS_OFF			0x01
@@ -110,6 +112,10 @@
 
 #define RELAY_ON		1
 #define RELAY_OFF		0
+
+#define SWITCH_TYPE_BIT 		  4
+#define ROCKERSWITCH_ACTION_TYPE  5
+
 /* 自定义类型区 ---------------------------------------------------------------- */
 
 /* 全局函数声明区 -------------------------------------------------------------- */

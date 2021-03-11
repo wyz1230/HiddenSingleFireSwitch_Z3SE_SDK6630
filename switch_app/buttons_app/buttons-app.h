@@ -46,6 +46,23 @@ void setSwitchType(uint8_t type);
 uint8_t getSwitchType(void);
 
 /**
+//函数名：setRockerSwitchActionType
+//描述：设置翘板开关动作类型
+//参数：type (uint8_t [输入]，0:固定方向开关 1:翻转)
+//返回：void
+*/
+void setRockerSwitchActionType(uint8_t type);
+
+/**
+//函数名：getRockerSwitchActionType
+//描述：获取翘板开关动作类型
+//参数：void
+//返回：0:固定方向开关 1:翻转
+*/
+uint8_t getRockerSwitchActionType(void);
+
+
+/**
 //函数名：getPowerOnRockerStatus
 //描述：获取上电时翘板开关实际的状态
 //参数：void

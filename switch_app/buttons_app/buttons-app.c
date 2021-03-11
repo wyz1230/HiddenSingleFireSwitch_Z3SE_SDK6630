@@ -63,7 +63,7 @@ static uint8_t onOffResetFlg =0;
 //踢网快闪切换仍然保持快闪
 //加网过程中切换仍然保持慢闪
 static uint8_t switch_type =SWITCH_TYPE_QIAOBAN; //默认开关类型为翘板型
-
+static uint8_t rockerSwitchActionType =ROCKERSWITCH_FIXED_ACTION;
 /* 全局函数声明区 -------------------------------------------------------------- */
 extern void unicastReportAttribute(uint16_t destination_addr,
                                    uint8_t dest_endpoint,
@@ -74,7 +74,6 @@ extern void unicastReportAttribute(uint16_t destination_addr,
                                    uint8_t *datas,
                                    uint8_t dataSize);
 extern EmberAfStatus writeDeviceTypeAttribute(uint8_t type);
-extern void setFlashSwitchType(uint8_t type);
 extern void switchAppNetworkUpTrigReport(uint8_t type);
 
 /* 本地函数声明区 -------------------------------------------------------------- */
@@ -148,6 +147,29 @@ void setSwitchType(uint8_t type)
 uint8_t getSwitchType(void)
 {
 	return switch_type;
+}
+
+/**
+//函数名：setRockerSwitchActionType
+//描述：设置翘板开关动作类型
+//参数：type (uint8_t [输入]，0:固定方向开关 1:翻转)
+//返回：void
+*/
+void setRockerSwitchActionType(uint8_t type)
+{
+    rockerSwitchActionType =type;
+	onOffResetHandler();
+}
+
+/**
+//函数名：getRockerSwitchActionType
+//描述：获取翘板开关动作类型
+//参数：void
+//返回：0:固定方向开关 1:翻转
+*/
+uint8_t getRockerSwitchActionType(void)
+{
+	return rockerSwitchActionType;
 }
 
 /**
@@ -493,6 +515,7 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 {
 	EmberAfStatus status =EMBER_ZCL_STATUS_SUCCESS;
 	uint8_t temp_switch_type =0;
+	uint16_t u16temp;
 	temp_switch_type =getSwitchType();
     buttonsAppDebugPrintln("the network:%d, val:%d",emberAfNetworkState(),temp_switch_type);
 	
@@ -502,11 +525,17 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 		{
 			//只允许网外切换开关类型
 			temp_switch_type = (temp_switch_type == SWITCH_TYPE_QIAOBAN? SWITCH_TYPE_DIANCHU : SWITCH_TYPE_QIAOBAN);
-			setFlashSwitchType(temp_switch_type);
+			u16temp =readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
+			if(temp_switch_type)
+				u16temp |= (0x01<<SWITCH_TYPE_BIT);
+			else
+				u16temp &=~(0x01<<SWITCH_TYPE_BIT);
+			//writeStorageCallBack(SWITCH_ALL_SET_TYPE,u16temp);
+			
 			setSwitchType(temp_switch_type);
 			
 			buttonsAppDebugPrintln("Change to current switch type:%d",temp_switch_type);
-			status =writeDeviceTypeAttribute(temp_switch_type);
+			status =writeAttributeCallBack(SWITCH_ALL_SET_TYPE,u16temp);
 			if (status == EMBER_ZCL_STATUS_SUCCESS) {
 				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
 			}
@@ -514,14 +543,13 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 		if(emberAfNetworkState() ==EMBER_JOINED_NETWORK)
 		{
 			//在网络内强制发一个开关类型报告
-
-	      unicastReportAttribute(0x0000,0x01,
-	                             0x01,
-	                             ZCL_BASIC_CLUSTER_ID,
-	                             ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID,
-	                             ZCL_ENUM8_ATTRIBUTE_TYPE,
-	                             (uint8_t *)&temp_switch_type,
-	                             1);
+			unicastReportAttribute(0x0000,0x01,
+								   emberAfEndpointFromIndex(0),
+								   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+								   ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
+								   ZCL_INT16U_ATTRIBUTE_TYPE,
+								   (uint8_t *)&u16temp,
+								   2);			
 		}
 	}
 }
@@ -740,7 +768,7 @@ void syncButtonAndSwitchStatus(void)
 	networkStatus =emberAfNetworkState();
     static uint8_t powerOnStatus;
 	uint8_t onoff[2];
-	powerOnStatus =readStorageCallBack(POWER_ON_STATUS_TYPE);
+	powerOnStatus =(readStorageCallBack(SWITCH_ALL_SET_TYPE)) & 0x03;
 	onoff[0] =readStorageCallBack(ONOFF_TYPE,1);
 	onoff[1] =readStorageCallBack(ONOFF_TYPE,2);
 	//网外上电自动启动加网以及设备重置，APP删除 自动进入配网

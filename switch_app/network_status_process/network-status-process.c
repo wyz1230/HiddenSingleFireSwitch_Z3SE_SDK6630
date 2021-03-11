@@ -142,7 +142,7 @@ bool checkAtrributeNeedToResetDefaultCallback(uint8_t endpoint,
 		 
 	 if((ZCL_ORVIBO_PRIVATE_CLUSTER_ID == clusterId) && (CLUSTER_MASK_SERVER == mask))
 	 {
-		if ((ZCL_AUTH_CODE_ATTRIBUTE_ID == attributeId) || (ZCL_POWER_ON_STATUS_ATTRIBUTE_ID ==attributeId))
+		if ((ZCL_AUTH_CODE_ATTRIBUTE_ID == attributeId))
 		{
 			networkStatusProcDebugPrintln(" Unreset ep=%d,cluID=%ld,attID=%ld",endpoint,clusterId,attributeId);
 			return false;  //AUTH不需要恢复出厂默认值

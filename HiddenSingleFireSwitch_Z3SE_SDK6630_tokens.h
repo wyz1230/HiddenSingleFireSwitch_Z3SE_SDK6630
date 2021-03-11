@@ -15,9 +15,9 @@
 // Creator for attribute: on/off, endpoint: 1
 #define CREATOR_ON_OFF_1 0xB002
 #define NVM3KEY_ON_OFF_1 ( NVM3KEY_DOMAIN_ZIGBEE | 0xB002 )
-// Creator for attribute: power on status, singleton.
-#define CREATOR_POWER_ON_STATUS_SINGLETON 0xB003
-#define NVM3KEY_POWER_ON_STATUS_SINGLETON ( NVM3KEY_DOMAIN_ZIGBEE | 0xB003 )
+// Creator for attribute: switch all set info, singleton.
+#define CREATOR_SWITCH_All_SET_INFO_SINGLETON 0xB003
+#define NVM3KEY_SWITCH_All_SET_INFO_SINGLETON ( NVM3KEY_DOMAIN_ZIGBEE | 0xB003 )
 // Creator for attribute: auth code, singleton.
 #define CREATOR_AUTH_CODE_SINGLETON 0xB004
 #define NVM3KEY_AUTH_CODE_SINGLETON ( NVM3KEY_DOMAIN_ZIGBEE | 0xB004 )
@@ -30,9 +30,9 @@
 #ifdef DEFINETYPES
 typedef uint8_t  tokType_generic_device_type;
 typedef uint8_t  tokType_physical_environment;
-typedef uint8_t  tokType_power_on_status;
 typedef uint8_t  tokType_auth_code[50];
 typedef uint8_t  tokType_on_off;
+typedef uint16_t  tokType_switch_all_set_info;
 #endif // DEFINETYPES
 
 
@@ -41,7 +41,7 @@ typedef uint8_t  tokType_on_off;
 DEFINE_BASIC_TOKEN(GENERIC_DEVICE_TYPE_SINGLETON, tokType_generic_device_type, 0)
 DEFINE_BASIC_TOKEN(PHYSICAL_ENVIRONMENT_SINGLETON, tokType_physical_environment, 0x00)
 DEFINE_BASIC_TOKEN(ON_OFF_1, tokType_on_off, 0x00)
-DEFINE_BASIC_TOKEN(POWER_ON_STATUS_SINGLETON, tokType_power_on_status, 0x01)
+DEFINE_BASIC_TOKEN(SWITCH_All_SET_INFO_SINGLETON, tokType_switch_all_set_info, 0x0001)
 DEFINE_BASIC_TOKEN(AUTH_CODE_SINGLETON, tokType_auth_code, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 DEFINE_BASIC_TOKEN(ON_OFF_2, tokType_on_off, 0x00)
 #endif // DEFINETOKENS
@@ -56,8 +56,8 @@ DEFINE_BASIC_TOKEN(ON_OFF_2, tokType_on_off, 0x00)
   emberAfWriteServerAttribute(1, ZCL_BASIC_CLUSTER_ID, ZCL_GENERIC_DEVICE_TYPE_ATTRIBUTE_ID, (uint8_t*)ptr, ZCL_ENUM8_ATTRIBUTE_TYPE); \
   halCommonGetToken((tokType_physical_environment *)ptr, TOKEN_PHYSICAL_ENVIRONMENT_SINGLETON); \
   emberAfWriteServerAttribute(1, ZCL_BASIC_CLUSTER_ID, ZCL_PHYSICAL_ENVIRONMENT_ATTRIBUTE_ID, (uint8_t*)ptr, ZCL_ENUM8_ATTRIBUTE_TYPE); \
-  halCommonGetToken((tokType_power_on_status *)ptr, TOKEN_POWER_ON_STATUS_SINGLETON); \
-  emberAfWriteServerAttribute(1, ZCL_ORVIBO_PRIVATE_CLUSTER_ID, ZCL_POWER_ON_STATUS_ATTRIBUTE_ID, (uint8_t*)ptr, ZCL_INT8U_ATTRIBUTE_TYPE); \
+  halCommonGetToken((tokType_switch_all_set_info *)ptr, TOKEN_SWITCH_All_SET_INFO_SINGLETON); \
+  emberAfWriteServerAttribute(1, ZCL_ORVIBO_PRIVATE_CLUSTER_ID, ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID, (uint8_t*)ptr, ZCL_INT16U_ATTRIBUTE_TYPE); \
   halCommonGetToken((tokType_auth_code *)ptr, TOKEN_AUTH_CODE_SINGLETON); \
   emberAfWriteServerAttribute(1, ZCL_ORVIBO_PRIVATE_CLUSTER_ID, ZCL_AUTH_CODE_ATTRIBUTE_ID, (uint8_t*)ptr, ZCL_CHAR_STRING_ATTRIBUTE_TYPE); \
   epNetwork = emberAfNetworkIndexFromEndpoint(1); \
@@ -84,8 +84,8 @@ DEFINE_BASIC_TOKEN(ON_OFF_2, tokType_on_off, 0x00)
     if ( metadata->attributeId == 0x0011 && 0x0000 == emberAfGetMfgCode(metadata) &&!emberAfAttributeIsClient(metadata) ) \
       halCommonSetToken(TOKEN_PHYSICAL_ENVIRONMENT_SINGLETON, data); \
   } else if ( clusterId == 0xFF00 ) { \
-    if ( metadata->attributeId == 0x0001 && 0x0000 == emberAfGetMfgCode(metadata) &&!emberAfAttributeIsClient(metadata) ) \
-      halCommonSetToken(TOKEN_POWER_ON_STATUS_SINGLETON, data); \
+    if ( metadata->attributeId == 0x0004 && 0x0000 == emberAfGetMfgCode(metadata) &&!emberAfAttributeIsClient(metadata) ) \
+      halCommonSetToken(TOKEN_SWITCH_All_SET_INFO_SINGLETON, data); \
     if ( metadata->attributeId == 0xFF00 && 0x0000 == emberAfGetMfgCode(metadata) &&!emberAfAttributeIsClient(metadata) ) \
       halCommonSetToken(TOKEN_AUTH_CODE_SINGLETON, data); \
   }\
