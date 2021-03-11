@@ -532,9 +532,9 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 				u16temp &=~(0x01<<SWITCH_TYPE_BIT);
 			//writeStorageCallBack(SWITCH_ALL_SET_TYPE,u16temp);
 			
-			setSwitchType(temp_switch_type);
+			setSwitchType(u16temp);
 			
-			buttonsAppDebugPrintln("Change to current switch type:%d",temp_switch_type);
+			buttonsAppDebugPrintln("Change to current switch type:%d,%d",temp_switch_type,u16temp);
 			status =writeAttributeCallBack(SWITCH_ALL_SET_TYPE,u16temp);
 			if (status == EMBER_ZCL_STATUS_SUCCESS) {
 				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
