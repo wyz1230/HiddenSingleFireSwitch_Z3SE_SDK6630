@@ -656,8 +656,14 @@ static void buttonHighCallbackProcess(uint8_t num)
 	buttonsAppDebugPrintln("=====high:%d,%d",num,switch_type);
     startOnOffReset();
     setButtonTrigType(num-1);
-	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_ON_COMMAND_ID,false);
-
+	if(getRockerSwitchActionType())
+	{
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_TOGGLE_COMMAND_ID,false);
+	}
+	else
+	{
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_ON_COMMAND_ID,false);
+	}
 }
 
 /**
@@ -678,7 +684,15 @@ static void buttonLowCallbackProcess(uint8_t num)
 	buttonsAppDebugPrintln("====low:%d,%d",num,switch_type);
     startOnOffReset();
     setButtonTrigType(num-1);
-	emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_OFF_COMMAND_ID,false);
+	if(getRockerSwitchActionType())
+	{
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_TOGGLE_COMMAND_ID,false);
+	}
+	else
+	{
+		emberAfOnOffClusterSetValueCallback(emberAfEndpointFromIndex(num-1),ZCL_OFF_COMMAND_ID,false);
+	}
+
     checkNetworkStateAndTrigeRejoin(); //jim add 20200717
 }
 
@@ -765,8 +779,17 @@ void syncButtonAndSwitchStatus(void)
 	uint8_t networkStatus =0;
 	networkStatus =emberAfNetworkState();
     static uint8_t powerOnStatus;
+	static uint16_t tempType =0,tmpSwitchType =0,tmpSwitchActionBehavior =0;
 	uint8_t onoff[2];
-	powerOnStatus =(readStorageCallBack(SWITCH_ALL_SET_TYPE)) & 0x03;
+	tempType =readStorageCallBack(SWITCH_ALL_SET_TYPE);
+	powerOnStatus =tempType & 0x03;
+    tmpSwitchType =(tempType>>SWITCH_TYPE_BIT) & 0x01;
+	tmpSwitchActionBehavior =(tempType>>ROCKERSWITCH_ACTION_TYPE) & 0x01;
+	
+    setSwitchType(tmpSwitchType);	
+	setRockerSwitchActionType(tmpSwitchActionBehavior);
+	buttonsAppDebugPrintln("switchType:%d,ActionBehavior:%d,PowerOnStatus:%d",tmpSwitchType,tmpSwitchActionBehavior,powerOnStatus);
+	
 	onoff[0] =readStorageCallBack(ONOFF_TYPE,1);
 	onoff[1] =readStorageCallBack(ONOFF_TYPE,2);
 	//网外上电自动启动加网以及设备重置，APP删除 自动进入配网

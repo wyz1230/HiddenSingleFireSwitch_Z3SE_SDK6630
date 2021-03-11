@@ -66,7 +66,7 @@ const static tLightIndicateInterval light_indicate_interval_table[LIGHT_LIST_MAX
 										 {LIGHT_OFF,    100},
 										 {LIGHT_ON,     1900},
 										 {LIGHT_OVER,   0}};
-static uint8_t lightIndicateFlg =false; //灯指示标志位
+//static uint8_t lightIndicateFlg =false; //灯指示标志位
 static uint8_t addNetOKFlg =false;	//加网成功标志位
 
 //jim add 20200717
@@ -117,7 +117,7 @@ bool reportingPluginCheckReportConfigExist(uint8_t endpoint,
 static void relayControlFinishedCallback(uint8_t way, uint8_t status);
 void switchAppNetworkUpTrigReport(uint8_t type);
 //static void batteryCapacityUpdateCallback(tBatteryWorkRecord *battery_record);
-static uint8_t readDeviceTypeAttribute(void);
+//static uint8_t readDeviceTypeAttribute(void);
 static void reportDeviceType(void);
 static void reportSwitchAllInfo(void);
 //jim add 20200717
@@ -323,12 +323,12 @@ void LightIndicateUpdate(bool type)
 	if(type)
 	{
 		emberEventControlSetActive(loadLightIndicateControl);
-		lightIndicateFlg =true;
+		//lightIndicateFlg =true;
 	}
 	else
 	{
 		emberEventControlSetInactive(loadLightIndicateControl);
-		lightIndicateFlg =false;
+		//lightIndicateFlg =false;
 	}
 	light_indicate_current_index =0;
 	customAppDebugPrintln("LightIndicateUpdate:%d",type);
@@ -354,7 +354,7 @@ void loadLightIndicateHandler(void)
    {
    	    customAppDebugPrintln("indicate over");
 		emberEventControlSetInactive(loadLightIndicateControl);
-		lightIndicateFlg =false;
+		//lightIndicateFlg =false;
 		light_indicate_current_index =0;
    }
 }
@@ -410,7 +410,6 @@ void appPowerOnInit(void)
 */
 void appPowerOnDelayInitEventHandler(void)
 {
-  uint16_t tempType =0;
   emberEventControlSetInactive(appPowerOnDelayInitEventControl);
 
   emberSetRadioPower(emberAfPluginNetworkSteeringGetPowerForRadioChannelCallback(emberGetRadioChannel()));
@@ -419,9 +418,7 @@ void appPowerOnDelayInitEventHandler(void)
   switchWaysConfigUpdateEndpointModelId();     //按开关路数更新endpoint的model id
   deviceInfoAppBasicAttributeInit();           //更新basic属性相关版本信息
   networkStatusProcessInit();                  //上电更新网络状态
-  tempType =readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
-  setSwitchType((tempType>>SWITCH_TYPE_BIT) & 0x01);
-  customAppDebugPrintln(">>app init,switch type:%d",tempType);
+  //customAppDebugPrintln(">>app init,switch type:%d",tempType);
 }
 
 /**
@@ -1095,6 +1092,7 @@ void emberAfPluginIdleSleepWakeUpCallback(uint32_t durationMs)
 #endif
 }
 
+#if 0
 /**
 //函数名：readDeviceTypeAttribute
 //描述：读开关类型的属性，并设置到对应的变量里
@@ -1114,7 +1112,7 @@ static uint8_t readDeviceTypeAttribute(void)
 	customAppDebugPrintln("read switch type attri:%d",temp);
 	return temp;
 }
-
+#endif
 /**
 //函数名：writeDeviceTypeAttribute
 //描述：写开关类型的属性
@@ -1245,9 +1243,7 @@ static void reportDeviceType(void)
 */
 static void reportSwitchAllInfo(void)
 {
-	uint16_t temp;
 	#if 0
-    temp =	readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
 	unicastReportAttribute(0x0000,0x01,
 						   emberAfEndpointFromIndex(0),
 						   ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
@@ -1261,8 +1257,7 @@ static void reportSwitchAllInfo(void)
 	                      ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
 	                      20000,
 	                      10000);  	
-	//reportingPluginTrigReport();
-	customAppDebugPrintln("poweron report qiaoban or huitan:%d",temp);	
+	//reportingPluginTrigReport();	
 	#if 0
 	if(	emberAfReadAttribute(emberAfEndpointFromIndex(0),
 								ZCL_BASIC_CLUSTER_ID,
@@ -1484,7 +1479,7 @@ void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 										  sizeof(tmpStatus)) == EMBER_ZCL_STATUS_SUCCESS)	   
 		   {
 			  uint8_t tmp;
-
+			  customAppDebugPrintln("switch info:0x%x,poweron status:%d",tmpStatus,tmpStatus&0x03);
 			  tmp =(tmpStatus>>SWITCH_TYPE_BIT) & 0x01;
 			  customAppDebugPrintln("+++app set SwitchType:%d",tmp);
 			  setSwitchType(tmp);
