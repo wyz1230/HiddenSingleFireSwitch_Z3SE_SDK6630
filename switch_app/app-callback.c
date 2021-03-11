@@ -1246,6 +1246,7 @@ static void reportDeviceType(void)
 static void reportSwitchAllInfo(void)
 {
 	uint16_t temp;
+	#if 0
     temp =	readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
 	unicastReportAttribute(0x0000,0x01,
 						   emberAfEndpointFromIndex(0),
@@ -1254,6 +1255,12 @@ static void reportSwitchAllInfo(void)
 						   ZCL_INT16U_ATTRIBUTE_TYPE,
 						   (uint8_t *)&temp,
 						   2);
+	#endif
+	reportingPluginTrigReport(0x01,
+	                      ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+	                      ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
+	                      20000,
+	                      10000);  	
 	//reportingPluginTrigReport();
 	customAppDebugPrintln("poweron report qiaoban or huitan:%d",temp);	
 	#if 0

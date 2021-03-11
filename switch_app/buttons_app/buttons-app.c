@@ -513,7 +513,6 @@ static void buttonsPressedProcess(uint8_t num)
 */
 static void buttonsZeroShortLongPressedProcess(uint8_t num)
 {
-	EmberAfStatus status =EMBER_ZCL_STATUS_SUCCESS;
 	uint8_t temp_switch_type =0;
 	uint16_t u16temp;
 	temp_switch_type =getSwitchType();
@@ -535,10 +534,9 @@ static void buttonsZeroShortLongPressedProcess(uint8_t num)
 			setSwitchType(u16temp);
 			
 			buttonsAppDebugPrintln("Change to current switch type:%d,%d",temp_switch_type,u16temp);
-			status =writeAttributeCallBack(SWITCH_ALL_SET_TYPE,u16temp);
-			if (status == EMBER_ZCL_STATUS_SUCCESS) {
-				ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
-			}
+			writeAttributeCallBack(SWITCH_ALL_SET_TYPE,u16temp);
+			ledsAppChangeLedsStatus(LEDS_STATUS_CHANGE_SWITCHTYPE_UPDATA); //快闪三次
+
 		}
 		if(emberAfNetworkState() ==EMBER_JOINED_NETWORK)
 		{
