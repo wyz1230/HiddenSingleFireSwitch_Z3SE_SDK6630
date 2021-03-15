@@ -270,6 +270,7 @@ beginAttrList:SAVED_TO_FLASH
 endAttrList:SAVED_TO_FLASH
 beginAttrList:REPORTABLE
   cl:0x0001, at:0x0020, di:server, mf:0x0000
+  cl:0xFF00, at:0x0004, di:server, mf:0x0000
 endAttrList:REPORTABLE
 beginAttributeDefaults
 cl:0x0000, at:0x0005, di:server, mf:0x0000 => 2810c2403b9c4a5db62cc62d1030d95e
@@ -289,6 +290,7 @@ beginAttributeDefaultReportingConfig
 cl:0x0006, at:0x0000, di:server, mf:0x0000 => 1,1200:0
 cl:0x0001, at:0x0021, di:server, mf:0x0000 => 60,18000:4
 cl:0x0001, at:0x0020, di:server, mf:0x0000 => 60,18000:1
+cl:0xFF00, at:0x0004, di:server, mf:0x0000 => 1,600:0
 endAttributeDefaultReportingConfig
 configuredNetwork:*type:ZIGBEE_PRO, name:Primary
 beginEndpointType:Primary

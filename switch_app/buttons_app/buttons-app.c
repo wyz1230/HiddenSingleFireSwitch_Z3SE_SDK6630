@@ -105,6 +105,7 @@ void startOnOffReset(void)
 	if(onoffResetCnt >=5)
 	{
 	  onoffResetCnt =0;
+	  onOffResetFlg =0;
 	  emberEventControlSetInactive(onOffResetControl);
 	  buttonsAppDebugPrintln("onOff Reset");
 	  networkStatusTrigeNetworkAction(NETWORK_ACTION_LEAVE);	  

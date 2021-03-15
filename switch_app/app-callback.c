@@ -90,15 +90,16 @@ static uint8_t trig_type[SWITCH_3WAYS] = {NONE_TRIG};
 //      clusterId (EmberAfClusterId [输入], 本地端上报的源端点下的cluster id;)
 //      attributeId (EmberAfAttributeId [输入], 本地端上报的cluster id下的attribute id;
 //                                              当为MAX_INT16U_VALUE时，表示所有配置表中的atrributes都上报)
-//      fix_delay_time_s (uint8_t [输入], 上报延时时间,秒;)
-//      random_delay_max_time_ms (uint16_t [输入], 上报随机时间,毫秒)
+//      fix_delay_time_ms (uint32_t [输入], 上报延时时间,毫秒;)
+//      random_delay_max_time_ms (uint16_t [输入], 上报随机时间,毫秒,小于2没作用)
 //返回：无
 */
 void reportingPluginTrigReport(uint8_t source_endpoint,
                                EmberAfClusterId clusterId,
                                EmberAfAttributeId attributeId,
-                               uint8_t fix_delay_time_s,
+                               uint32_t fix_delay_time_ms,
                                uint16_t random_delay_max_time_ms);
+
 /**
 //函数名：reportingPluginCheckReportConfigExist
 //描述：检测对应的cluster是否在上报配置表
@@ -526,6 +527,7 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
  */
 bool emberAfStackStatusCallback(EmberStatus status)
 {
+#if 1
 #ifdef POWER_ON_NETWORK_UP_TRIGREJOIN_CODE //20200428 jim add for test
   //第一次上电，还认为在网，会进行一次全信道的扫描(禁止)，故加的此代码
   static uint8_t first_power_on = 1;
@@ -545,6 +547,7 @@ bool emberAfStackStatusCallback(EmberStatus status)
     first_power_on = 0;
     return false;
   }
+#endif
 #endif
   networkStatusChangeProcess(status);
   if (EMBER_NETWORK_UP == status)
@@ -738,7 +741,7 @@ EmberStatus emberAfRemoteSetBindingPermissionCallback(const EmberBindingTableEnt
     reportingPluginTrigReport(entry->local,
                               entry->clusterId,
                               MAX_INT16U_VALUE,
-                              1,
+                              1000,
                               2000);
     customAppDebugPrintln("bonding report");
   }
@@ -774,7 +777,7 @@ void switchAppNetworkUpTrigReport(uint8_t type)
 			reportingPluginTrigReport(endpoint,
 									  ZCL_ON_OFF_CLUSTER_ID,
 									  ZCL_ON_OFF_ATTRIBUTE_ID,
-									  2+i,
+									  (2+i)*10000,
 									  2000); //随机时间上电后每个节点后延一秒
 			customAppDebugPrintln("+++network up onoff report");
 			#endif
@@ -805,11 +808,20 @@ void reportingPluginReportInitLoadSettingCallback(const EmberAfPluginReportingEn
         reportingPluginTrigReport(endpoint,
                                   ZCL_ON_OFF_CLUSTER_ID,
                                   ZCL_ON_OFF_ATTRIBUTE_ID,
-                                  5+i,
+                                  (5+i)*10000,
                                   2000); //随机时间上电后每个节点后延一秒
       }
     }
   }
+  if ((entry -> clusterId == ZCL_ORVIBO_PRIVATE_CLUSTER_ID) &&
+      (entry -> attributeId == ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID))
+  {
+     reportingPluginTrigReport(emberAfEndpointFromIndex(0),
+                               ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
+                               ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
+                               8000,
+                               1000); //随机时间上报
+  }  
 }
 /**
 //函数名：reportingPluginReportableChangeCallback
@@ -909,7 +921,7 @@ void orviboCoordinatorIdentifyFinishCallback(void)
         reportingPluginTrigReport(unbind_report_enable[i],
                                   ZCL_ON_OFF_CLUSTER_ID,
                                   ZCL_ON_OFF_ATTRIBUTE_ID,
-                                  1+i,
+                                  (1+i)*1000,
                                   1000); //随机时间上电后每个节点后延一秒
       }
    }
@@ -969,6 +981,7 @@ void unicastReportAttribute(uint16_t destination_addr,
 */
 void reportingPluginReportWithoutBindTableProcCallback(uint8_t source_endpoint,EmberAfClusterId clusterId)
 {
+  #if 0
   if (whetherIsOrviboCoordinator() == true)
   {
     for (uint8_t i=0; i<local_ways; i++)
@@ -996,7 +1009,31 @@ void reportingPluginReportWithoutBindTableProcCallback(uint8_t source_endpoint,E
       }
     }
   }
+  #endif
+  if ((ZCL_ON_OFF_CLUSTER_ID == clusterId) || (clusterId == ZCL_ORVIBO_PRIVATE_CLUSTER_ID)) //主动上报 
+  {
+       EmberApsFrame *apsFrame = NULL;
+       apsFrame = emberAfGetCommandApsFrame();
+       apsFrame->sourceEndpoint = source_endpoint;
+       apsFrame->destinationEndpoint = 0x01;
+       apsFrame->options = EMBER_AF_DEFAULT_APS_OPTIONS;
+       emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,0x0000);
+  }    
 }
+
+/**
+//函数名：reportingPluginAfterBindReportProcCallback
+//描述：绑定上报后的回调，由运用层处理特殊情况。
+//参数：source_endpoint (uint8_t          [输入]，本地上报的源endpoint号)
+//      clusterId       (EmberAfClusterId [输入]，本地上报的ClusterId号)
+//返回：void
+*/
+void reportingPluginAfterBindReportProcCallback(uint8_t source_endpoint,EmberAfClusterId clusterId)
+{
+  //美的网关对接，不确定是否会绑定设备，就算绑定，也同样上报一条给网关。如果有绑定了上报给网关，此时会出现两条上报。
+  reportingPluginReportWithoutBindTableProcCallback(source_endpoint,clusterId);
+}
+
 #endif
 
 /** @brief Pre Message Send
@@ -1255,8 +1292,9 @@ static void reportSwitchAllInfo(void)
 	reportingPluginTrigReport(0x01,
 	                      ZCL_ORVIBO_PRIVATE_CLUSTER_ID,
 	                      ZCL_SWITCH_All_SET_INFO_ATTRIBUTE_ID,
-	                      20000,
+	                      10000,
 	                      10000);  	
+	customAppDebugPrintln("==up report switch info");
 	//reportingPluginTrigReport();	
 	#if 0
 	if(	emberAfReadAttribute(emberAfEndpointFromIndex(0),
@@ -1479,7 +1517,8 @@ void emberAfOrviboPrivateClusterServerAttributeChangedCallback(uint8_t endpoint,
 										  sizeof(tmpStatus)) == EMBER_ZCL_STATUS_SUCCESS)	   
 		   {
 			  uint8_t tmp;
-			  customAppDebugPrintln("switch info:0x%x,poweron status:%d",tmpStatus,tmpStatus&0x03);
+			  //上电关闭，回弹开关 0x1101
+			  customAppDebugPrintln("switch info:0x%2x,%d,poweron status:%d",tmpStatus,tmpStatus,tmpStatus&0x03);
 			  tmp =(tmpStatus>>SWITCH_TYPE_BIT) & 0x01;
 			  customAppDebugPrintln("+++app set SwitchType:%d",tmp);
 			  setSwitchType(tmp);

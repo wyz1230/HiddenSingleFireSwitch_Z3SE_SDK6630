@@ -55,9 +55,10 @@
 
 #define LIVE_LINE_ONLY         1  //单火线版本
 #define LIVE_NAUGHT_LINE       2  //零火线版本
-#define HIDDEN_SINGFIRE		   3  //隐藏式单火版本
+#define HIDDEN_SINGFIRE_GENERAL  3 //隐藏式单火版本.通用版本，默认上电关闭，默认是翘板开关，控制翘板开关的方式是固定方式
+#define HIDDEN_SINGFIRE_THAILAND  4 //泰国，默认上电是跟随翘板开关状态，默认是翘板开关，控制翘板开关的方式是固定方式
 
-#define POWER_LINE_SUPPLY      HIDDEN_SINGFIRE
+#define POWER_LINE_SUPPLY      HIDDEN_SINGFIRE_GENERAL		
 
 #define SWITCH_TYPE_QIAOBAN			0//默认为翘板型
 #define SWITCH_TYPE_DIANCHU         1//点触型
@@ -82,9 +83,12 @@
   #define SWITCH_2_GAND_MODELID_STRING   "b11c438ea86f416b9026b2526b7abe84"
   #define SWITCH_3_GAND_MODELID_STRING   "e8d667cb184b4a2880dd886c23d00976"
   #pragma message("ORVIBO MixSwitch 零火版")
-#elif(POWER_LINE_SUPPLY == HIDDEN_SINGFIRE)
-  #define HIDDEN_SINGFIRE_MODELID_STRING "2810c2403b9c4a5db62cc62d1030d95e" //"2810c2403b9c4a5db62cc62d1030d95e" 
+#elif(POWER_LINE_SUPPLY == HIDDEN_SINGFIRE_GENERAL)  
+  #define HIDDEN_SINGFIRE_MODELID_STRING "2810c2403b9c4a5db62cc62d1030d95e" 
+#elif(POWER_LINE_SUPPLY == HIDDEN_SINGFIRE_THAILAND)  
+  #define HIDDEN_SINGFIRE_MODELID_STRING "733f264889b948c198c5f8bf2ba3b28a" 
 #endif
+
 
 //定义版本信息，此部分会在上电打印和更新basic属性值。
 #ifdef EMBER_AF_PLUGIN_OTA_CLIENT_POLICY_FIRMWARE_VERSION
@@ -94,7 +98,7 @@
   #warning "ota file version undefine!"
 #endif
 #define ORB_MANUFACTURE_NAME_STRING      "ORVIBO"
-#define ORB_DATE_CODE_STRING             "20210305"
+#define ORB_DATE_CODE_STRING             "20210315"
 #define ORB_SW_BUILD_ID_STRING           "2.0.2"
 
 #define ORB_PRODUCT_NAME_STRING          "SingleFireSwitch-MG21"
