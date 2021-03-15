@@ -782,7 +782,7 @@ void syncButtonAndSwitchStatus(void)
     static uint8_t powerOnStatus;
 	static uint16_t tempType =0,tmpSwitchType =0,tmpSwitchActionBehavior =0;
 	uint8_t onoff[2];
-	tempType =readStorageCallBack(SWITCH_ALL_SET_TYPE);
+	tempType =readStorageCallBack(SWITCH_ALL_SET_TYPE,0);
 	powerOnStatus =tempType & 0x03;
     tmpSwitchType =(tempType>>SWITCH_TYPE_BIT) & 0x01;
 	tmpSwitchActionBehavior =(tempType>>ROCKERSWITCH_ACTION_TYPE) & 0x01;

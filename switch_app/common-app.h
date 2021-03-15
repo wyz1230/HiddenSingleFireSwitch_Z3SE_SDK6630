@@ -179,5 +179,25 @@ void setButtonTrigType(uint8_t way);
 */
 void resetAddNetProcess(void);
 
+/**
+ //函数名：writeAttributeCallBack
+ //描述：写相关属性值
+ //参数：endpoint: 节点
+ // 	 type: 0为上电状态类型 1为开关类型
+ // 	 value: 待写入的onoff或亮度或色温值
+ //返回：void
+ */
+ void writeAttributeCallBack(uint8_t type, uint16_t value);
+
+ /**
+ //函数名：readStorageCallBack
+ //描述：获取相关token值
+ // 	 上电初始化调用
+ //参数：type: 0为开关状态 1为上电状态类型 2为开关类型
+ //返回：从存储区读出的存储值
+ */
+ uint16_t readStorageCallBack(uint8_t type,uint8_t ep);
+
+
 #endif
 /*************************************** 文 件 结 束 ******************************************/
