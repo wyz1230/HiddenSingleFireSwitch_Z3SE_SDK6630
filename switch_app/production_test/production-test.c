@@ -219,7 +219,12 @@ static void getAuthCodeFromToken(tTokenTypeCustomAuthCode *code);
 //MixSwitch部分的测试
 static void tinyCLI_GetWaysConfig(void);          //获取开关路数配置结果
 static void tinyCLI_RelayControl(void);           //继电器控制
-
+static void tinyCLI_SetPowerOnStatus(void);
+static void tinyCLI_GetPowerOnStatus(void);
+static void tinyCLI_SetSwitchType(void);
+static void tinyCLI_GetSwitchType(void);
+static void tinyCLI_SetRockerSwitchAction(void);
+static void tinyCLI_GetRockerSwitchAction(void);
 
 //命令表定义：命令名(不能有空格) - 命令函数名 - 参数类型 - 参数说明 - 命令功能描述
 //---------------参数类型定义-----------------
@@ -296,7 +301,7 @@ const CLI_cmdTable_t CLI_cmdTable[] =
     ADD_CLI_ITEMS("Test-FactoryReset",         tinyCLI_FactoryReset,          NULL,   \
                   "null",                                "Reset to the factory default"),
 
-    ADD_SECTION("MixSwitch Test"),
+    ADD_SECTION("Switch Test"),
 
     ADD_CLI_ITEMS("Test-GetWaysConfig",        tinyCLI_GetWaysConfig,         NULL,   \
                   "null",                                "Get the ways config"),
@@ -305,7 +310,21 @@ const CLI_cmdTable_t CLI_cmdTable[] =
     ADD_CLI_ITEMS("Test-GetAuthCode",     tinyCLI_GetAuthCode,      NULL,   \
                   "null",                                "Get the gateway authorisation result"),
     ADD_CLI_ITEMS("Test-DeleteAuthCode",  tinyCLI_DeleteAuthCode,   NULL,   \
-                  "null",                                "Delete the gateway authorisation code"),                  
+                  "null",                                "Delete the gateway authorisation code"),  
+    ADD_CLI_ITEMS("Test-SetPowerOnStatus",     tinyCLI_SetPowerOnStatus,          "1",   \
+                  "PowerOnStatus(0~2)",                   "Set PowerOn Status"),	
+    ADD_CLI_ITEMS("Test-GetPowerOnStatus",     tinyCLI_GetPowerOnStatus,       NULL,   \
+                  "null",                                "Get PowerOn Status"),         
+	ADD_CLI_ITEMS("Test-SetSwitchType",	   tinyCLI_SetSwitchType,		  "1",	 \
+				  "SwitchType(0~1)", 				  "Set Switch Type"),	
+	ADD_CLI_ITEMS("Test-GetSwitchType",	   tinyCLI_GetSwitchType,	   NULL,   \
+				  "null",								 "Get Switch Type"),   
+	ADD_CLI_ITEMS("Test-SetRockerSwitchAction",	   tinyCLI_SetRockerSwitchAction,		  "1",	 \
+				  "PowerOnStatus(0~1)", 				  "Set Rocker Switch Action"),	
+	ADD_CLI_ITEMS("Test-GetRockerSwitchAction",	   tinyCLI_GetRockerSwitchAction,	   NULL,   \
+				  "null",								 "Get Rocker Switch Action"),   
+
+                  
 	TINY_CLI_END()
 };
 /* 函数原型 ----------------------------------------------------------------- */
@@ -2612,6 +2631,51 @@ static void tinyCLI_DeleteAuthCode(void)
     //由于mac地址只能写入一次，所有删除动作是无法执行的，故这里固定返回失败
     productionTestResponds(RSP_FAIL_STRING);  
 }
+
+static void tinyCLI_SetPowerOnStatus(void)
+{
+	//成功:Rsp OK
+	uint8_t tmp;
+	tmp = *(uint8_t *)CLI_getArguments(1);
+	
+	if (tmp > 2)
+	{
+	  productionTestResponds(RSP_FAIL_STRING);
+	  return;
+	}  
+	//writeLightAttributeCallBack(POWER_ON_STATUS_TYPE, tmp);
+	productionTestResponds(RSP_OK_STRING);
+
+}
+
+static void tinyCLI_GetPowerOnStatus(void)
+{
+	uint8_t tmp;
+	//tmp =readLightStorageCallBack(POWER_ON_STATUS_TYPE);
+	productionTestResponds("%d\r\n",tmp);
+
+}
+
+static void tinyCLI_SetSwitchType(void)
+{
+
+}
+
+static void tinyCLI_GetSwitchType(void)
+{
+
+}
+
+static void tinyCLI_SetRockerSwitchAction(void)
+{
+
+}
+
+static void tinyCLI_GetRockerSwitchAction(void)
+{
+
+}
+
 
 #endif //end ORB_PRODUCTION_TEST_CODE
 /***************************************** 文 件 结 束 ************************************************/
